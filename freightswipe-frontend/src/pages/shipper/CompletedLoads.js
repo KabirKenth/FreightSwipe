@@ -70,8 +70,15 @@ const CompletedLoads = () => {
                 {load.status === 'COMPLETED' && !hasReviewed && (
                   <button className="btn btn-primary btn-sm mt-2" onClick={() => handleReview(load.id)}>Leave Review</button>
                 )}
+                {hasReviewed && (
+                  <div className="mt-3">
+                    <h6>Your Review:</h6>
+                    <p>Rating: {load.reviews.find(review => review.reviewerId === userId).rating}/5</p>
+                    <p>{load.reviews.find(review => review.reviewerId === userId).comment}</p>
+                  </div>
+                )}
                 {load.status === 'COMPLETED' && matchedTrucker && (
-                  <Link to={`/reviews/${matchedTrucker.id}`} className="btn btn-info btn-sm mt-2 ms-2">View Reviews</Link>
+                  <Link to={`/reviews/${matchedTrucker.id}`} className="btn btn-info btn-sm mt-2 ms-2">View All Reviews for this Trucker</Link>
                 )}
               </li>
             )

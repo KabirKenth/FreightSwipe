@@ -9,7 +9,7 @@ const MatchedLoads = () => {
   const fetchMatchedLoads = async () => {
     try {
       const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/matches`, { withCredentials: true });
-      const allMatches = response.data;
+      const allMatches = response.data.matches;
       setMatchedLoads(allMatches.filter(match => match.status === 'MATCHED' && match.load.status === 'MATCHED'));
     } catch (err) {
       setError('Failed to fetch matched loads');

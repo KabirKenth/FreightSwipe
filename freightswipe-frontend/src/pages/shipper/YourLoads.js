@@ -17,7 +17,7 @@ const YourLoads = () => {
       const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/loads`, { withCredentials: true });
       console.log('Frontend received loads data:', response.data);
       // Sort loads by creation date in descending order
-      const sortedLoads = response.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      const sortedLoads = response.data.loads.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
       setLoads(sortedLoads);
     } catch (err) {
       setError('Failed to fetch loads');

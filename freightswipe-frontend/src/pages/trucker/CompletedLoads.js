@@ -63,10 +63,17 @@ const CompletedLoads = () => {
               <li key={match.id} className="list-group-item">
                 <h5>Load: {match.load.origin.address}, {match.load.origin.city}, {match.load.origin.province} to {match.load.destination.address}, {match.load.destination.city}, {match.load.destination.province}</h5>
                 <p>Shipper: {match.shipper.name} ({match.shipper.email})</p>
-                <Link to={`/reviews/${match.shipper.id}`} className="btn btn-info btn-sm me-2">View Reviews</Link>
+                <Link to={`/reviews/${match.shipper.id}`} className="btn btn-info btn-sm me-2">View All Reviews for this Shipper</Link>
                 <p>Status: {match.load.status}</p>
                 {match.load.status === 'COMPLETED' && !hasReviewed && (
                   <button className="btn btn-primary btn-sm mt-2" onClick={() => handleReview(match.load.id)}>Leave Review</button>
+                )}
+                {hasReviewed && (
+                  <div className="mt-3">
+                    <h6>Your Review:</h6>
+                    <p>Rating: {match.load.reviews.find(review => review.reviewerId === userId).rating}/5</p>
+                    <p>{match.load.reviews.find(review => review.reviewerId === userId).comment}</p>
+                  </div>
                 )}
               </li>
             )

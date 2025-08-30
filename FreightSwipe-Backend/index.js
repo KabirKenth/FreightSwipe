@@ -650,10 +650,6 @@ app.post('/reviews', authMiddleware, async (req, res) => {
 app.get('/reviews/:userId', authMiddleware, async (req, res) => {
   const { userId } = req.params;
 
-  if (req.user.id !== userId) {
-    return res.status(403).json({ error: 'Forbidden' });
-  }
-
   try {
     const reviews = await prisma.review.findMany({
       where: { reviewedId: userId },

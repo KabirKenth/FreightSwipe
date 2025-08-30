@@ -8,7 +8,7 @@ const InTransitLoads = () => {
   const fetchInTransitLoads = async () => {
     try {
       const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/loads`, { withCredentials: true });
-      setInTransitLoads(response.data.filter(load => load.status === 'IN_TRANSIT'));
+      setInTransitLoads(response.data.loads.filter(load => load.status === 'IN_TRANSIT'));
     } catch (err) {
       setError('Failed to fetch in-transit loads');
     }
