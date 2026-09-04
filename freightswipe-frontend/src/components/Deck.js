@@ -1,27 +1,25 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState } from 'react'
 import { useSprings, animated, to as interpolate } from '@react-spring/web'
 import { useDrag } from '@use-gesture/react'
 import { Link } from 'react-router-dom'
 
+// Resting position for card i. The offset is capped so a 17-card deck does not
+// stack 68px up the page, and there is no `delay` -- delaying the initial set is
+// what left the deck blank on first paint.
 const to = (i) => ({
   x: 0,
-  y: i * -4,
+  y: Math.min(i, 3) * 4,
   scale: 1,
   rot: 0,
-  delay: i * 100,
 })
-const from = (_i) => ({ x: 0, rot: 0, scale: 1.5, y: -1000 })
 const trans = (r, s) =>
   `perspective(1500px) rotateY(${r / 10}deg) rotateZ(${r}deg) scale(${s})`
 
 function Deck({ data, onSwipe }) {
   const [gone] = useState(() => new Set())
-  const [props, api] = useSprings(data.length, i => ({
-    ...to(i),
-    from: from(i),
-  }))
-
-  const childRefs = useMemo(() => Array(data.length).fill(0).map(i => React.createRef()), [data.length])
+  // No entrance animation: springs created with a far-off `from` were not settling,
+  // which left every card parked ~1000px above the viewport and the deck invisible.
+  const [props, api] = useSprings(data.length, i => ({ ...to(i) }))
 
   const triggerSwipe = (dir, index) => {
     gone.add(index);
@@ -77,7 +75,7 @@ function Deck({ data, onSwipe }) {
                 style={{
                   transform: interpolate([rot, scale], trans),
                 }} >
-                <div className='card'>
+                <div className='swipe-card'>
                   {isLoad ? (
                     <>
                       <h3>{item.origin.address}, {item.origin.city}, {item.origin.province} to {item.destination.address}, {item.destination.city}, {item.destination.province}</h3>
