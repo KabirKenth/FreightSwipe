@@ -1,8 +1,9 @@
 
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import axios from 'axios';
-import { useLoadScript, Autocomplete } from '@react-google-maps/api';
+import { useLoadScript } from '@react-google-maps/api';
 import { API_BASE } from '../api';
+import PlaceAutocomplete from './PlaceAutocomplete';
 
 const libraries = ['places'];
 
@@ -31,61 +32,21 @@ const CreateLoadForm = ({ onNewLoad }) => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  const originAutocompleteRef = useRef(null);
-  const destinationAutocompleteRef = useRef(null);
-
-  const handleOriginPlaceChanged = () => {
-    const place = originAutocompleteRef.current.getPlace();
-    fillInAddress(place, setOriginStreet, setOriginCity, setOriginProvince, setOriginPostalCode, setOriginCountry);
+  // Applies a place chosen in the address search to one end of the trip.
+  const applyOrigin = (a) => {
+    setOriginStreet(a.address);
+    setOriginCity(a.city);
+    setOriginProvince(a.province);
+    setOriginPostalCode(a.postalCode);
+    setOriginCountry(a.country);
   };
 
-  const handleDestinationPlaceChanged = () => {
-    const place = destinationAutocompleteRef.current.getPlace();
-    fillInAddress(place, setDestinationStreet, setDestinationCity, setDestinationProvince, setDestinationPostalCode, setDestinationCountry);
-  };
-
-  const fillInAddress = (place, setStreet, setCity, setProvince, setPostalCode, setCountry) => {
-    if (!place) return; // Add this check
-    let street_number = '';
-    let route = '';
-    let city = '';
-    let province = '';
-    let postal_code = '';
-    let country = '';
-
-    if (place.address_components) {
-      for (const component of place.address_components) {
-        const type = component.types[0];
-        switch (type) {
-          case 'street_number':
-            street_number = component.long_name || '';
-            break;
-          case 'route':
-            route = component.long_name || '';
-            break;
-          case 'locality':
-            city = component.long_name || '';
-            break;
-          case 'administrative_area_level_1':
-            province = component.short_name || '';
-            break;
-          case 'postal_code':
-            postal_code = component.long_name || '';
-            break;
-          case 'country':
-            country = component.long_name || '';
-            break;
-          default:
-            break;
-        }
-      }
-    }
-
-    setStreet(`${street_number} ${route}`.trim());
-    setCity(city);
-    setProvince(province);
-    setPostalCode(postal_code);
-    setCountry(country);
+  const applyDestination = (a) => {
+    setDestinationStreet(a.address);
+    setDestinationCity(a.city);
+    setDestinationProvince(a.province);
+    setDestinationPostalCode(a.postalCode);
+    setDestinationCountry(a.country);
   };
 
   const ensureString = (value) => {
@@ -196,13 +157,9 @@ const CreateLoadForm = ({ onNewLoad }) => {
     }
   };
 
-  if (loadError) {
-    return <div>Error loading maps</div>;
-  }
-
-  if (!isLoaded) {
-    return <div>Loading...</div>;
-  }
+  // The address search is a convenience, not a dependency: if Places is slow,
+  // blocked or unavailable the form still works as plain text fields.
+  const mapsReady = isLoaded && !loadError;
 
   return (
     <div className="card mt-4">
@@ -211,20 +168,17 @@ const CreateLoadForm = ({ onNewLoad }) => {
         {error && <div className="alert alert-danger">{error}</div>}
         {success && <div className="alert alert-primary">{success}</div>}
         <form onSubmit={handleSubmit}>
+          <h6 className="text-muted mt-2">Pickup</h6>
+          <PlaceAutocomplete ready={mapsReady} onSelect={applyOrigin} />
           <div className="mb-3">
             <label className="form-label">Origin Address</label>
-            <Autocomplete
-              onLoad={(ref) => (originAutocompleteRef.current = ref)}
-              onPlaceChanged={handleOriginPlaceChanged}
-            >
-              <input
-                type="text"
-                className="form-control"
-                value={originStreet}
-                onChange={(e) => setOriginStreet(e.target.value)}
-                required
-              />
-            </Autocomplete>
+            <input
+              type="text"
+              className="form-control"
+              value={originStreet}
+              onChange={(e) => setOriginStreet(e.target.value)}
+              required
+            />
           </div>
           <div className="mb-3">
             <label className="form-label">Origin City</label>
@@ -267,20 +221,17 @@ const CreateLoadForm = ({ onNewLoad }) => {
             />
           </div>
 
+          <h6 className="text-muted mt-4">Delivery</h6>
+          <PlaceAutocomplete ready={mapsReady} onSelect={applyDestination} />
           <div className="mb-3">
             <label className="form-label">Destination Address</label>
-            <Autocomplete
-              onLoad={(ref) => (destinationAutocompleteRef.current = ref)}
-              onPlaceChanged={handleDestinationPlaceChanged}
-            >
-              <input
-                type="text"
-                className="form-control"
-                value={destinationStreet}
-                onChange={(e) => setDestinationStreet(e.target.value)}
-                required
-              />
-            </Autocomplete>
+            <input
+              type="text"
+              className="form-control"
+              value={destinationStreet}
+              onChange={(e) => setDestinationStreet(e.target.value)}
+              required
+            />
           </div>
           <div className="mb-3">
             <label className="form-label">Destination City</label>
