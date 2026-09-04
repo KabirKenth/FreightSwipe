@@ -4,7 +4,7 @@ A freight marketplace where shippers post loads and truckers swipe through the o
 that fit. Both sides confirm pickup, track the load in transit, and review each
 other on delivery.
 
-**Live demo:** _(URL added after first deploy)_ — use the **Explore as a Shipper** /
+**Live demo:** https://freightswipe.vercel.app — use the **Explore as a Shipper** /
 **Explore as a Trucker** buttons on the landing page. No registration needed.
 
 ## Stack
