@@ -10,11 +10,8 @@ const DeclinedLoads = () => {
   const fetchDeclinedLoads = async () => {
     try {
       const response = await axios.get(`${API_BASE}/matches`, { withCredentials: true });
-      const allMatches = response.data;
-      console.log('All matches:', allMatches);
-      const filteredMatches = allMatches.filter(match => match.status === 'REJECTED');
-      console.log('Filtered declined matches:', filteredMatches);
-      setDeclinedLoads(filteredMatches);
+      const { matches, userId } = response.data;
+      setDeclinedLoads(matches.filter((match) => match.status === 'REJECTED' && match.truckerId === userId));
     } catch (err) {
       setError('Failed to fetch declined loads');
     }

@@ -18,6 +18,8 @@
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   z-index: 1001;
-  width: 640px;
-  height: 540px;
+  /* Fixed 640x540 overflowed narrow screens; cap to the viewport instead. */
+  width: min(640px, 92vw);
+  max-height: 85vh;
+  overflow-y: auto;
 }

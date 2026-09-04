@@ -9,8 +9,10 @@
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   z-index: 1001;
-  width: 600px;
-  height: 500px;
+  /* Fixed 600x500 overflowed narrow screens; cap to the viewport instead. */
+  width: min(600px, 92vw);
+  max-height: 85vh;
+  overflow-y: auto;
 }
 
 .sb-title {

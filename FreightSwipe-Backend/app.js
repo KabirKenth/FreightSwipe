@@ -358,9 +358,6 @@ app.post('/trucker/verify', authMiddleware, async (req, res) => {
  * @access Private (Shippers only)
  */
 app.post('/loads', authMiddleware, validate(loadSchema), async (req, res) => {
-  console.log('--- New /loads request ---');
-  console.log('--- New /loads request ---');
-
   const { origin, destination, weight, budget, deadline, description } = req.body;
 
   // Checks if selected date is in the past (Not Possible to create a load with a past deadline)
@@ -369,7 +366,6 @@ app.post('/loads', authMiddleware, validate(loadSchema), async (req, res) => {
   today.setUTCHours(0, 0, 0, 0);
 
   if (selectedDate < today) {
-    console.log('Load creation failed: Deadline is in the past');
     return res.status(400).json({ error: 'Deadline cannot be in the past.' });
   }
 
@@ -426,7 +422,6 @@ app.post('/loads', authMiddleware, validate(loadSchema), async (req, res) => {
  * @access Private (Shippers only)
  */
 app.get('/loads', authMiddleware, async (req, res) => {
-  console.log('--- Received GET /loads request ---');
   const loads = await prisma.load.findMany({
     where: {
       shipperId: req.user.id
@@ -452,7 +447,6 @@ app.get('/loads', authMiddleware, async (req, res) => {
       destination: true // Include destination address details
     }
   });
-  console.log('Loads sent to frontend:', JSON.stringify(loads, null, 2));
   res.json({ loads, userId: req.user.id });
 });
 

@@ -12,7 +12,6 @@ const LoginPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Frontend Login Request:', { email, password });
     try {
       const response = await axios.post(`${API_BASE}/auth/login`, { email, password }, { withCredentials: true });
       const { user } = response.data;

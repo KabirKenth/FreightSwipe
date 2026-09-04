@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Deck from '../../components/Deck';
-import { Link } from 'react-router-dom';
 import { API_BASE } from '../../api';
 
 const PendingMatches = () => {

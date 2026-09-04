@@ -16,7 +16,6 @@ const YourLoads = () => {
   const fetchLoads = async () => {
     try {
       const response = await axios.get(`${API_BASE}/loads`, { withCredentials: true });
-      console.log('Frontend received loads data:', response.data);
       // Sort loads by creation date in descending order
       const sortedLoads = response.data.loads.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
       setLoads(sortedLoads);

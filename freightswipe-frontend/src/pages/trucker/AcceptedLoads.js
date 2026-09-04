@@ -11,10 +11,7 @@ const AcceptedLoads = () => {
     try {
       const response = await axios.get(`${API_BASE}/matches`, { withCredentials: true });
       const { matches, userId } = response.data;
-      console.log('All matches:', matches);
-      const filteredMatches = matches.filter(match => match.status === 'PENDING' && match.truckerId === userId);
-      console.log('Filtered accepted matches:', filteredMatches);
-      setAcceptedLoads(filteredMatches);
+      setAcceptedLoads(matches.filter((match) => match.status === 'PENDING' && match.truckerId === userId));
     } catch (err) {
       setError('Failed to fetch accepted loads');
     }
