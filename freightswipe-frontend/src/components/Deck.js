@@ -63,8 +63,7 @@ function Deck({ data, onSwipe }) {
   })
 
   return (
-    <>
-      <div className='cardContainer'>
+    <div className='cardContainer'>
         {props.map(({ x, y, rot, scale }, i) => {
           const item = data[i];
           const isLoad = !item.trucker;
@@ -78,15 +77,19 @@ function Deck({ data, onSwipe }) {
                 <div className='swipe-card'>
                   {isLoad ? (
                     <>
-                      <h3>{item.origin.address}, {item.origin.city}, {item.origin.province} to {item.destination.address}, {item.destination.city}, {item.destination.province}</h3>
+                      <h3>{item.origin.city}, {item.origin.province} &rarr; {item.destination.city}, {item.destination.province}</h3>
+                      <p>{item.origin.address} to {item.destination.address}</p>
                       <p>Weight: {item.weight} lbs</p>
                       <p>Budget: ${item.budget}</p>
                       <p>Deadline: {new Date(item.deadline).toLocaleDateString()}</p>
+                      {item.description && <p>{item.description}</p>}
                     </>
                   ) : (
                     <>
-                      <h5>Load: {item.load.origin?.address}, {item.load.origin?.city}, {item.load.origin?.province} to {item.load.destination?.address}, {item.load.destination?.city}, {item.load.destination?.province}</h5>
-                      <p>Trucker: {item.trucker.name} ({item.trucker.email})</p>
+                      <h5>{item.load.origin?.city}, {item.load.origin?.province} &rarr; {item.load.destination?.city}, {item.load.destination?.province}</h5>
+                      <p>Trucker: {item.trucker.name}</p>
+                      <p>Weight: {item.load.weight} lbs</p>
+                      <p>Budget: ${item.load.budget}</p>
                       <p>Status: {item.status}</p>
                       <Link to={`/reviews/${item.trucker.id}`} className="btn btn-info btn-sm mt-2">View Reviews</Link>
                     </>
@@ -100,8 +103,7 @@ function Deck({ data, onSwipe }) {
             </animated.div>
           )
         })}
-      </div>
-    </>
+    </div>
   )
 }
 
