@@ -4,7 +4,7 @@
   "private": true,
   "description": "FreightSwipe \u2014 shipper/trucker freight matching. React frontend and Express API deployed together on one Vercel domain.",
   "scripts": {
-    "vercel-build": "prisma generate --schema=FreightSwipe-Backend/prisma/schema.prisma && CI=false DISABLE_ESLINT_PLUGIN=true npm run build --prefix freightswipe-frontend",
+    "vercel-build": "prisma migrate deploy --schema=FreightSwipe-Backend/prisma/schema.prisma && prisma generate --schema=FreightSwipe-Backend/prisma/schema.prisma && CI=false DISABLE_ESLINT_PLUGIN=true npm run build --prefix freightswipe-frontend",
     "db:migrate": "prisma migrate deploy --schema=FreightSwipe-Backend/prisma/schema.prisma",
     "db:seed": "node FreightSwipe-Backend/prisma/seed.js",
     "db:reset-demo": "npm run db:migrate && npm run db:seed"

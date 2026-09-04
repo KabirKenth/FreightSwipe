@@ -7,6 +7,7 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const cookieParser = require('cookie-parser');
 const Joi = require('joi');
+const crypto = require('crypto');
 require('dotenv').config();
 
 // --- Prisma and Express Initialization ---
@@ -240,6 +241,37 @@ app.get('/health', async (req, res) => {
     res.json({ status: 'ok', database: 'connected' });
   } catch (err) {
     res.status(503).json({ status: 'degraded', database: 'unreachable' });
+  }
+});
+
+/**
+ * @route POST /admin/seed
+ * @description Rebuilds the demo dataset. Disabled unless SEED_TOKEN is set, and
+ *              then only callable with that token in the x-seed-token header.
+ *              This exists because the database sits behind a network that only
+ *              the deployed app can reach.
+ * @access Token
+ */
+app.post('/admin/seed', async (req, res) => {
+  const expected = process.env.SEED_TOKEN;
+
+  // Without a configured token the route does not exist at all.
+  if (!expected) return res.status(404).json({ error: 'Not found' });
+
+  const provided = req.get('x-seed-token') || '';
+  const a = Buffer.from(provided);
+  const b = Buffer.from(expected);
+  if (a.length !== b.length || !crypto.timingSafeEqual(a, b)) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  try {
+    const { seed } = require('./prisma/seed');
+    const summary = await seed(prisma);
+    res.json({ status: 'seeded', ...summary });
+  } catch (err) {
+    console.error('Seed failed:', err);
+    res.status(500).json({ error: 'Seed failed', detail: err.message });
   }
 });
 

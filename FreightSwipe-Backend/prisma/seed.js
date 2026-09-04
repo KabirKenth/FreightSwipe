@@ -13,8 +13,6 @@
 const { PrismaClient } = require('@prisma/client');
 const bcrypt = require('bcryptjs');
 
-const prisma = new PrismaClient();
-
 const DEMO_PASSWORD = 'demo1234';
 
 const day = 24 * 60 * 60 * 1000;
@@ -127,116 +125,147 @@ const LOADS = [
   { shipper: 'bayview',     from: 'montrealE', to: 'quebecCity', weight: 6700,  budget: 540,  deadline: -4, status: 'CANCELLED', description: 'Order pulled before pickup.' },
 ];
 
-async function main() {
-  console.log('Seeding FreightSwipe demo data...');
+// --- Seeding -----------------------------------------------------------------
 
-  // Wipe in foreign-key-safe order so the seed can be re-run to reset the demo.
-  await prisma.review.deleteMany();
-  await prisma.match.deleteMany();
-  await prisma.load.deleteMany();
-  await prisma.truckerProfile.deleteMany();
-  await prisma.user.deleteMany();
-  await prisma.address.deleteMany();
-  console.log('  cleared existing data');
+/**
+ * Prisma ids are plain strings, so generating them up front lets every table be
+ * written with a single createMany instead of one round trip per row. That keeps
+ * the whole seed inside a serverless function's time budget.
+ */
+const newId = (() => {
+  const base = Date.now().toString(36);
+  let n = 0;
+  return () => 'c' + base + (n++).toString(36).padStart(4, '0') + Math.random().toString(36).slice(2, 8);
+})();
+
+let standaloneClient = null;
+
+/**
+ * Wipes and rebuilds the demo dataset.
+ * @param {import('@prisma/client').PrismaClient} [client] - reuses the API's client when called in-process.
+ * @returns {Promise<object>} counts of what was written
+ */
+async function seed(client) {
+  const p = client || (standaloneClient = standaloneClient || new PrismaClient());
+
+  // Foreign-key-safe order.
+  await p.review.deleteMany();
+  await p.match.deleteMany();
+  await p.load.deleteMany();
+  await p.truckerProfile.deleteMany();
+  await p.user.deleteMany();
+  await p.address.deleteMany();
 
   const passwordHash = await bcrypt.hash(DEMO_PASSWORD, 10);
+
   const users = {};
+  const userRows = [];
+  const profileRows = [];
 
   for (const s of SHIPPERS) {
-    users[s.key] = await prisma.user.create({
-      data: { email: s.email, name: s.name, passwordHash, role: 'SHIPPER', balance: s.balance },
-    });
+    const row = { id: newId(), email: s.email, name: s.name, passwordHash, role: 'SHIPPER', balance: s.balance };
+    users[s.key] = row;
+    userRows.push(row);
   }
 
   for (const t of TRUCKERS) {
-    users[t.key] = await prisma.user.create({
-      data: {
-        email: t.email,
-        name: t.name,
-        passwordHash,
-        role: 'TRUCKER',
-        balance: t.balance,
-        truckerProfile: {
-          create: { vehicleType: t.vehicleType, licenseId: t.licenseId, verified: t.verified },
-        },
-      },
-    });
+    const row = { id: newId(), email: t.email, name: t.name, passwordHash, role: 'TRUCKER', balance: t.balance };
+    users[t.key] = row;
+    userRows.push(row);
+    profileRows.push({ id: newId(), userId: row.id, vehicleType: t.vehicleType, licenseId: t.licenseId, verified: t.verified });
   }
 
-  users.admin = await prisma.user.create({
-    data: { email: 'admin@freightswipe.app', name: 'FreightSwipe Operations', passwordHash, role: 'ADMIN', balance: 0 },
-  });
-  console.log('  created ' + Object.keys(users).length + ' users');
+  const admin = { id: newId(), email: 'admin@freightswipe.app', name: 'FreightSwipe Operations', passwordHash, role: 'ADMIN', balance: 0 };
+  users.admin = admin;
+  userRows.push(admin);
 
-  // Each load gets its own origin/destination rows, mirroring how the API
-  // creates addresses when a shipper posts a load.
-  const addressFor = (key) => prisma.address.create({ data: PLACES[key] });
-
-  let matchCount = 0;
-  let reviewCount = 0;
+  const addressRows = [];
+  const loadRows = [];
+  const matchRows = [];
+  const reviewRows = [];
 
   for (const spec of LOADS) {
-    const [origin, destination] = await Promise.all([addressFor(spec.from), addressFor(spec.to)]);
-    const shipper = users[spec.shipper];
+    const origin = { id: newId(), ...PLACES[spec.from] };
+    const destination = { id: newId(), ...PLACES[spec.to] };
+    addressRows.push(origin, destination);
 
-    const load = await prisma.load.create({
-      data: {
-        shipperId: shipper.id,
-        originId: origin.id,
-        destinationId: destination.id,
-        weight: spec.weight,
-        budget: spec.budget,
-        deadline: inDays(spec.deadline),
-        description: spec.description,
-        status: spec.status,
-        shipperInTransitConfirmed: Boolean(spec.shipperConfirmed),
-        truckerInTransitConfirmed: Boolean(spec.truckerConfirmed),
-        createdAt: inDays(spec.deadline - 14),
-      },
-    });
+    const shipper = users[spec.shipper];
+    const load = {
+      id: newId(),
+      shipperId: shipper.id,
+      originId: origin.id,
+      destinationId: destination.id,
+      weight: spec.weight,
+      budget: spec.budget,
+      deadline: inDays(spec.deadline),
+      description: spec.description,
+      status: spec.status,
+      shipperInTransitConfirmed: Boolean(spec.shipperConfirmed),
+      truckerInTransitConfirmed: Boolean(spec.truckerConfirmed),
+      createdAt: inDays(spec.deadline - 14),
+    };
+    loadRows.push(load);
 
     if (!spec.match) continue;
 
     const trucker = users[spec.match.trucker];
-    await prisma.match.create({
-      data: {
-        loadId: load.id,
-        truckerId: trucker.id,
-        shipperId: shipper.id,
-        status: spec.match.status,
-        createdAt: inDays(spec.deadline - 10),
-      },
+    matchRows.push({
+      id: newId(),
+      loadId: load.id,
+      truckerId: trucker.id,
+      shipperId: shipper.id,
+      status: spec.match.status,
+      createdAt: inDays(spec.deadline - 10),
     });
-    matchCount += 1;
 
     if (!spec.review) continue;
 
-    await prisma.review.createMany({
-      data: [
-        { loadId: load.id, reviewerId: shipper.id, reviewedId: trucker.id, rating: spec.review.rating, comment: spec.review.ofTrucker, createdAt: inDays(spec.deadline + 1) },
-        { loadId: load.id, reviewerId: trucker.id, reviewedId: shipper.id, rating: spec.review.rating, comment: spec.review.ofShipper, createdAt: inDays(spec.deadline + 1) },
-      ],
-    });
-    reviewCount += 2;
+    reviewRows.push(
+      { id: newId(), loadId: load.id, reviewerId: shipper.id, reviewedId: trucker.id, rating: spec.review.rating, comment: spec.review.ofTrucker, createdAt: inDays(spec.deadline + 1) },
+      { id: newId(), loadId: load.id, reviewerId: trucker.id, reviewedId: shipper.id, rating: spec.review.rating, comment: spec.review.ofShipper, createdAt: inDays(spec.deadline + 1) },
+    );
   }
 
-  const openBoard = LOADS.filter((l) => l.status === 'PENDING' && !l.match).length;
+  // Parents before children, so the foreign keys always resolve.
+  await p.user.createMany({ data: userRows });
+  await p.truckerProfile.createMany({ data: profileRows });
+  await p.address.createMany({ data: addressRows });
+  await p.load.createMany({ data: loadRows });
+  await p.match.createMany({ data: matchRows });
+  await p.review.createMany({ data: reviewRows });
 
-  console.log('  created ' + LOADS.length + ' loads (' + openBoard + ' untouched on the open board)');
-  console.log('  created ' + matchCount + ' matches and ' + reviewCount + ' reviews');
-  console.log('');
-  console.log('Demo logins (password: ' + DEMO_PASSWORD + ')');
-  console.log('  shipper  demo.shipper@freightswipe.app');
-  console.log('  trucker  demo.trucker@freightswipe.app');
-  console.log('  admin    admin@freightswipe.app');
-  console.log('Done.');
+  return {
+    users: userRows.length,
+    truckerProfiles: profileRows.length,
+    addresses: addressRows.length,
+    loads: loadRows.length,
+    matches: matchRows.length,
+    reviews: reviewRows.length,
+    openBoard: LOADS.filter((l) => l.status === 'PENDING' && !l.match).length,
+  };
 }
 
-main()
-  .catch((err) => {
-    console.error('Seed failed:', err);
-    process.exitCode = 1;
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
-  });
+module.exports = { seed, DEMO_PASSWORD };
+
+// Run directly:  node prisma/seed.js
+if (require.main === module) {
+  seed()
+    .then((summary) => {
+      console.log('Seeded FreightSwipe demo data:');
+      console.log(`  ${summary.users} users, ${summary.truckerProfiles} trucker profiles`);
+      console.log(`  ${summary.loads} loads (${summary.openBoard} untouched on the open board)`);
+      console.log(`  ${summary.matches} matches, ${summary.reviews} reviews`);
+      console.log('');
+      console.log(`Demo logins (password: ${DEMO_PASSWORD})`);
+      console.log('  shipper  demo.shipper@freightswipe.app');
+      console.log('  trucker  demo.trucker@freightswipe.app');
+      console.log('  admin    admin@freightswipe.app');
+    })
+    .catch((err) => {
+      console.error('Seed failed:', err);
+      process.exitCode = 1;
+    })
+    .finally(async () => {
+      if (standaloneClient) await standaloneClient.$disconnect();
+    });
+}
