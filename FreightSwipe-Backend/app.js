@@ -30,14 +30,25 @@ const allowedOrigins = (process.env.CORS_ORIGIN || 'http://localhost:3000')
   .map((o) => o.trim())
   .filter(Boolean);
 
-app.use(cors({
-  credentials: true,
-  origin: (origin, cb) => {
-    // Same-origin and server-to-server requests send no Origin header.
-    if (!origin || allowedOrigins.includes(origin)) return cb(null, true);
-    return cb(new Error('Not allowed by CORS'));
-  },
-}));
+// Browsers send an Origin header on every POST/PUT/DELETE, including same-origin
+// ones (only same-origin GET/HEAD omit it). Since the API is served from the same
+// domain as the app, the deployment's own origin must be allowed explicitly or
+// every write is rejected -- and that origin changes per deployment URL, so it is
+// derived from the request's Host rather than hardcoded.
+const corsDelegate = (req, cb) => {
+  const origin = req.headers.origin;
+  const host = req.headers.host;
+  const sameOrigin = Boolean(origin) && Boolean(host)
+    && (origin === `https://${host}` || origin === `http://${host}`);
+
+  cb(null, {
+    credentials: true,
+    // No Origin header at all means same-origin GET or a server-to-server call.
+    origin: !origin || sameOrigin || allowedOrigins.includes(origin),
+  });
+};
+
+app.use(cors(corsDelegate));
 app.use(express.json());
 app.use(helmet());
 app.use(cookieParser());
