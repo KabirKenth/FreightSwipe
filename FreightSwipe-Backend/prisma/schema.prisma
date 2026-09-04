@@ -1,10 +1,16 @@
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  // "native" for local/docker; the rhel target is what Vercel's Node runtime needs.
+  binaryTargets = ["native", "rhel-openssl-3.0.x"]
 }
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  // Pooled connection (Supabase transaction pooler, port 6543) used at runtime.
+  url       = env("DATABASE_URL")
+  // Direct connection (port 5432) — migrations cannot run through a transaction pooler.
+  // Falls back to DATABASE_URL when unset, which is correct for local docker-compose.
+  directUrl = env("DIRECT_URL")
 }
 
 model User {

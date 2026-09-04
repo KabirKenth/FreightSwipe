@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { API_BASE } from '../../api';
 
 const InTransitLoads = () => {
   const [inTransitLoads, setInTransitLoads] = useState([]);
@@ -7,7 +8,7 @@ const InTransitLoads = () => {
 
   const fetchInTransitLoads = async () => {
     try {
-      const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/loads`, { withCredentials: true });
+      const response = await axios.get(`${API_BASE}/loads`, { withCredentials: true });
       setInTransitLoads(response.data.loads.filter(load => load.status === 'IN_TRANSIT'));
     } catch (err) {
       setError('Failed to fetch in-transit loads');
@@ -20,7 +21,7 @@ const InTransitLoads = () => {
 
   const handleUpdateLoadStatus = async (loadId, status) => {
     try {
-      await axios.put(`${process.env.REACT_APP_BACKEND_URL}/loads/${loadId}/status`, { status }, { withCredentials: true });
+      await axios.put(`${API_BASE}/loads/${loadId}/status`, { status }, { withCredentials: true });
       fetchInTransitLoads();
     } catch (err) {
       console.error('Failed to update load status:', err);

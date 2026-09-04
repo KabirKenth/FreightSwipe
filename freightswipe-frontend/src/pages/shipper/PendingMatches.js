@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Deck from '../../components/Deck';
 import { Link } from 'react-router-dom';
+import { API_BASE } from '../../api';
 
 const PendingMatches = () => {
   const [pendingMatches, setPendingMatches] = useState([]);
@@ -9,7 +10,7 @@ const PendingMatches = () => {
 
   const fetchPendingMatches = async () => {
     try {
-      const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/matches`, { withCredentials: true });
+      const response = await axios.get(`${API_BASE}/matches`, { withCredentials: true });
       const { matches, userId } = response.data;
       setPendingMatches(matches.filter(match => match.status === 'PENDING' && match.shipperId === userId));
     } catch (err) {
@@ -24,7 +25,7 @@ const PendingMatches = () => {
   const handleMatchResponse = async (direction, matchId) => {
     try {
       const status = direction === 'right' ? 'MATCHED' : 'REJECTED';
-      await axios.post(`${process.env.REACT_APP_BACKEND_URL}/matches`, { matchId, status, action: 'respond' }, { withCredentials: true });
+      await axios.post(`${API_BASE}/matches`, { matchId, status, action: 'respond' }, { withCredentials: true });
       fetchPendingMatches();
     } catch (err) {
       console.error('Failed to respond to match:', err);

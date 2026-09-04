@@ -2,6 +2,7 @@
 import React, { useState, useRef } from 'react';
 import axios from 'axios';
 import { useLoadScript, Autocomplete } from '@react-google-maps/api';
+import { API_BASE } from '../api';
 
 const libraries = ['places'];
 
@@ -162,7 +163,7 @@ const CreateLoadForm = ({ onNewLoad }) => {
     }
 
     try {
-      const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/loads`, {
+      const response = await axios.post(`${API_BASE}/loads`, {
         origin: originData,
         destination: destinationData,
         weight: parseFloat(weight),

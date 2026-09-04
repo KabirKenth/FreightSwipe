@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { API_BASE } from '../../api';
 
 /**
  * A component that displays a list of loads created by the shipper.
@@ -14,7 +15,7 @@ const YourLoads = () => {
    */
   const fetchLoads = async () => {
     try {
-      const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/loads`, { withCredentials: true });
+      const response = await axios.get(`${API_BASE}/loads`, { withCredentials: true });
       console.log('Frontend received loads data:', response.data);
       // Sort loads by creation date in descending order
       const sortedLoads = response.data.loads.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
@@ -37,7 +38,7 @@ const YourLoads = () => {
     // Confirm the deletion with the user
     if (window.confirm('Are you sure you want to delete this load?')) {
       try {
-        await axios.delete(`${process.env.REACT_APP_BACKEND_URL}/loads/${loadId}`, { withCredentials: true });
+        await axios.delete(`${API_BASE}/loads/${loadId}`, { withCredentials: true });
         // Remove the deleted load from the state
         setLoads(loads.filter(load => load.id !== loadId));
       } catch (err) {
@@ -55,7 +56,7 @@ const YourLoads = () => {
     // Confirm the cancellation with the user
     if (window.confirm('Are you sure you want to cancel this load? A $5 fee will be charged to your account.')) {
       try {
-        await axios.post(`${process.env.REACT_APP_BACKEND_URL}/loads/${loadId}/cancel`, {}, { withCredentials: true });
+        await axios.post(`${API_BASE}/loads/${loadId}/cancel`, {}, { withCredentials: true });
         // Refetch the loads to update the status
         fetchLoads();
       } catch (err) {

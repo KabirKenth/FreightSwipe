@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
+import { API_BASE } from '../../api';
 
 const MatchedLoads = () => {
   const [matchedLoads, setMatchedLoads] = useState([]);
@@ -8,7 +9,7 @@ const MatchedLoads = () => {
 
   const fetchMatchedLoads = async () => {
     try {
-      const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/matches`, { withCredentials: true });
+      const response = await axios.get(`${API_BASE}/matches`, { withCredentials: true });
       setMatchedLoads(response.data.matches.filter(match => match.status === 'MATCHED' && match.load.status === 'MATCHED'));
     } catch (err) {
       setError('Failed to fetch matched loads');
@@ -21,7 +22,7 @@ const MatchedLoads = () => {
 
   const handleUpdateLoadStatus = async (loadId, status) => {
     try {
-      await axios.put(`${process.env.REACT_APP_BACKEND_URL}/loads/${loadId}/status`, { status }, { withCredentials: true });
+      await axios.put(`${API_BASE}/loads/${loadId}/status`, { status }, { withCredentials: true });
       fetchMatchedLoads();
     } catch (err) {
       console.error('Failed to update load status:', err);

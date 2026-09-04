@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
+import { API_BASE } from '../../api';
 
 const CompletedLoads = () => {
   const [completedLoads, setCompletedLoads] = useState([]);
@@ -13,7 +14,7 @@ const CompletedLoads = () => {
 
   const fetchCompletedLoads = async () => {
     try {
-      const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/matches`, { withCredentials: true });
+      const response = await axios.get(`${API_BASE}/matches`, { withCredentials: true });
       const { matches, userId } = response.data;
       setCompletedLoads(matches.filter(match => match.status === 'MATCHED' && match.load && match.load.status === 'COMPLETED' && match.truckerId === userId));
       setUserId(userId);
@@ -38,7 +39,7 @@ const CompletedLoads = () => {
     }
 
     try {
-      await axios.post(`${process.env.REACT_APP_BACKEND_URL}/reviews`, { loadId: reviewLoadId, rating: parseInt(reviewRating), comment: reviewComment }, { withCredentials: true });
+      await axios.post(`${API_BASE}/reviews`, { loadId: reviewLoadId, rating: parseInt(reviewRating), comment: reviewComment }, { withCredentials: true });
       setShowReviewForm(false);
       setReviewLoadId(null);
       setReviewRating(5);

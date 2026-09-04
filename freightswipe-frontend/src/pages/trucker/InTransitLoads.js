@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
+import { API_BASE } from '../../api';
 
 const InTransitLoads = () => {
   const [inTransitLoads, setInTransitLoads] = useState([]);
@@ -8,7 +9,7 @@ const InTransitLoads = () => {
 
   const fetchInTransitLoads = async () => {
     try {
-      const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/matches`, { withCredentials: true });
+      const response = await axios.get(`${API_BASE}/matches`, { withCredentials: true });
       const { matches, userId } = response.data;
       setInTransitLoads(matches.filter(match => match.status === 'MATCHED' && match.load.status === 'IN_TRANSIT' && match.truckerId === userId));
     } catch (err) {

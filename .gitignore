@@ -1,0 +1,19 @@
+# dependencies
+node_modules/
+**/node_modules/
+
+# secrets
+.env
+.env.*
+!.env.example
+
+# builds
+build/
+.vercel/
+
+# misc
+.DS_Store
+*.log
+
+# committed: configures the production build target
+!.env.production

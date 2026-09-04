@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { API_BASE } from '../api';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
@@ -13,7 +14,7 @@ const LoginPage = () => {
     e.preventDefault();
     console.log('Frontend Login Request:', { email, password });
     try {
-      const response = await axios.post('http://localhost:3001/auth/login', { email, password }, { withCredentials: true });
+      const response = await axios.post(`${API_BASE}/auth/login`, { email, password }, { withCredentials: true });
       const { user } = response.data;
       // The backend now sets an HttpOnly cookie, so we don't need to store the token in localStorage
 

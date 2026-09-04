@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+import { API_BASE } from '../api';
 
 const ReviewsPage = () => {
   const { userId } = useParams();
@@ -11,7 +12,7 @@ const ReviewsPage = () => {
   useEffect(() => {
     const fetchReviews = async () => {
       try {
-        const response = await fetch(`http://localhost:3001/reviews/${userId}`, {
+        const response = await fetch(`${API_BASE}/reviews/${userId}`, {
           credentials: 'include',
         });
         if (!response.ok) {

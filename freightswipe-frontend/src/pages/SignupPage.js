@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { API_BASE } from '../api';
 
 const SignupPage = () => {
   const [name, setName] = useState('');
@@ -14,7 +15,7 @@ const SignupPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:3001/auth/signup', { name, email, password, role }, { withCredentials: true });
+      const response = await axios.post(`${API_BASE}/auth/signup`, { name, email, password, role }, { withCredentials: true });
       const { user } = response.data;
 
       if (user.role === 'SHIPPER') {

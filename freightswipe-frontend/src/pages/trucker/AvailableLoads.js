@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Deck from '../../components/Deck';
+import { API_BASE } from '../../api';
 
 const AvailableLoads = () => {
   const [loads, setLoads] = useState([]);
@@ -8,7 +9,7 @@ const AvailableLoads = () => {
 
   const fetchLoads = async () => {
     try {
-      const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/loads/available`, { withCredentials: true });
+      const response = await axios.get(`${API_BASE}/loads/available`, { withCredentials: true });
       const sortedLoads = response.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
       setLoads(sortedLoads);
     } catch (err) {
@@ -23,9 +24,9 @@ const AvailableLoads = () => {
   const handleSwipe = async (direction, loadId) => {
     try {
       if (direction === 'right') {
-        await axios.post(`${process.env.REACT_APP_BACKEND_URL}/matches`, { loadId, status: 'PENDING', action: 'swipe' }, { withCredentials: true });
+        await axios.post(`${API_BASE}/matches`, { loadId, status: 'PENDING', action: 'swipe' }, { withCredentials: true });
       } else if (direction === 'left') {
-        await axios.post(`${process.env.REACT_APP_BACKEND_URL}/matches`, { loadId, status: 'REJECTED', action: 'swipe' }, { withCredentials: true });
+        await axios.post(`${API_BASE}/matches`, { loadId, status: 'REJECTED', action: 'swipe' }, { withCredentials: true });
       }
       setLoads(loads.filter(load => load.id !== loadId));
     } catch (err) {

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
+import { API_BASE } from '../../api';
 
 const DeclinedLoads = () => {
   const [declinedLoads, setDeclinedLoads] = useState([]);
@@ -8,7 +9,7 @@ const DeclinedLoads = () => {
 
   const fetchDeclinedLoads = async () => {
     try {
-      const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/matches`, { withCredentials: true });
+      const response = await axios.get(`${API_BASE}/matches`, { withCredentials: true });
       const allMatches = response.data;
       console.log('All matches:', allMatches);
       const filteredMatches = allMatches.filter(match => match.status === 'REJECTED');
