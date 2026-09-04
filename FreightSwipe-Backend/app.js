@@ -14,6 +14,12 @@ require('dotenv').config();
 const prisma = new PrismaClient();
 const app = express();
 
+// Vercel terminates TLS and proxies to the function, so the client IP arrives in
+// X-Forwarded-For. Without this, express-rate-limit either sees a single shared
+// proxy IP (rate-limiting every visitor together) or trips its own proxy
+// validation check. "1" trusts exactly one hop, which is what Vercel provides.
+app.set('trust proxy', 1);
+
 // --- Middleware ---
 
 // Allowed browser origins. In the single-domain Vercel deploy the frontend and API
