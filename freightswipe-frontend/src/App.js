@@ -8,6 +8,7 @@ import './styles/aurora.css';
 import './App.css';
 
 // Import Pages
+import { AuthProvider } from './auth';
 import ErrorBoundary from './components/ErrorBoundary';
 import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
@@ -36,30 +37,32 @@ function App() {
   return (
     <ErrorBoundary>
       <Router>
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/signup" element={<SignupPage />} />
-          <Route path="/shipper/dashboard" element={<ShipperDashboard />} />
-          <Route path="/trucker/dashboard" element={<TruckerDashboard />} />
-          <Route path="/admin/dashboard" element={<AdminDashboard />} />
-          <Route path="/reviews/:userId" element={<ReviewsPage />} />
+        <AuthProvider>
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/signup" element={<SignupPage />} />
+            <Route path="/shipper/dashboard" element={<ShipperDashboard />} />
+            <Route path="/trucker/dashboard" element={<TruckerDashboard />} />
+            <Route path="/admin/dashboard" element={<AdminDashboard />} />
+            <Route path="/reviews/:userId" element={<ReviewsPage />} />
 
-          {/* Trucker Routes */}
-          <Route path="/trucker/available-loads" element={<AvailableLoadsTrucker />} />
-          <Route path="/trucker/matched-loads" element={<MatchedLoadsTrucker />} />
-          <Route path="/trucker/in-transit-loads" element={<InTransitLoadsTrucker />} />
-          <Route path="/trucker/accepted-loads" element={<AcceptedLoadsTrucker />} />
-          <Route path="/trucker/declined-loads" element={<DeclinedLoadsTrucker />} />
-          <Route path="/trucker/completed-loads" element={<CompletedLoadsTrucker />} />
+            {/* Trucker Routes */}
+            <Route path="/trucker/available-loads" element={<AvailableLoadsTrucker />} />
+            <Route path="/trucker/matched-loads" element={<MatchedLoadsTrucker />} />
+            <Route path="/trucker/in-transit-loads" element={<InTransitLoadsTrucker />} />
+            <Route path="/trucker/accepted-loads" element={<AcceptedLoadsTrucker />} />
+            <Route path="/trucker/declined-loads" element={<DeclinedLoadsTrucker />} />
+            <Route path="/trucker/completed-loads" element={<CompletedLoadsTrucker />} />
 
-          {/* Shipper Routes */}
-          <Route path="/shipper/your-loads" element={<YourLoadsShipper />} />
-          <Route path="/shipper/pending-matches" element={<PendingMatchesShipper />} />
-          <Route path="/shipper/matched-loads" element={<MatchedLoadsShipper />} />
-          <Route path="/shipper/in-transit-loads" element={<InTransitLoadsShipper />} />
-          <Route path="/shipper/completed-loads" element={<CompletedLoadsShipper />} />
-        </Routes>
+            {/* Shipper Routes */}
+            <Route path="/shipper/your-loads" element={<YourLoadsShipper />} />
+            <Route path="/shipper/pending-matches" element={<PendingMatchesShipper />} />
+            <Route path="/shipper/matched-loads" element={<MatchedLoadsShipper />} />
+            <Route path="/shipper/in-transit-loads" element={<InTransitLoadsShipper />} />
+            <Route path="/shipper/completed-loads" element={<CompletedLoadsShipper />} />
+          </Routes>
+        </AuthProvider>
       </Router>
     </ErrorBoundary>
   );

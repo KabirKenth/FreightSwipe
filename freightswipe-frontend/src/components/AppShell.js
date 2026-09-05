@@ -1,13 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useAuth, dashboardFor } from '../auth';
 
 /**
  * The Aurora top bar and nav footer, wrapped around every interior page.
  *
- * Section links are derived from the current path rather than passed in by each
- * page, so adding a route to App.js is the only place a link has to be
- * registered. `variant="hero"` drops the bar onto a transparent, Paper White
- * treatment for the landing page, where it sits over the hero field.
+ * Both are session-aware. Nothing role-specific is shown to a visitor who is
+ * not signed in -- a stranger has no use for "Pending matches", and a shipper
+ * has no use for the trucker queues, which would only 403.
+ *
+ * `variant="hero"` drops the bar onto a transparent treatment for the landing
+ * page, where it sits over the hero field.
  */
 
 const SHIPPER_LINKS = [
@@ -28,10 +31,17 @@ const TRUCKER_LINKS = [
   { to: '/trucker/completed-loads', label: 'Completed' },
 ];
 
-const linksFor = (pathname) => {
-  if (pathname.startsWith('/shipper')) return SHIPPER_LINKS;
-  if (pathname.startsWith('/trucker')) return TRUCKER_LINKS;
-  return [];
+const QUEUES = { SHIPPER: SHIPPER_LINKS, TRUCKER: TRUCKER_LINKS };
+
+/**
+ * Section links for the bar. Driven by the signed-in role rather than the URL,
+ * so typing a shipper path while signed out does not produce a nav for an
+ * account you are not in.
+ */
+const linksFor = (user, pathname) => {
+  const links = (user && QUEUES[user.role]) || [];
+  const prefix = user && user.role === 'SHIPPER' ? '/shipper' : '/trucker';
+  return pathname.startsWith(prefix) ? links : [];
 };
 
 /** The one place the Aurora Spectrum gradient is spent on this page. */
@@ -43,7 +53,9 @@ export const Wordmark = ({ className = '' }) => (
 
 export const TopNav = ({ variant = 'default' }) => {
   const { pathname } = useLocation();
-  const links = linksFor(pathname);
+  const { user, loading, signOut } = useAuth();
+  const navigate = useNavigate();
+  const links = linksFor(user, pathname);
   const overHero = variant === 'hero';
   // Over the hero the bar is transparent with Paper White type. Once the hero
   // has scrolled away that type would sit invisible on the canvas, so the bar
@@ -58,6 +70,11 @@ export const TopNav = ({ variant = 'default' }) => {
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, [overHero]);
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/');
+  };
 
   return (
     <header
@@ -86,59 +103,107 @@ export const TopNav = ({ variant = 'default' }) => {
 
         <div className="au-nav__spacer" />
 
-        {links.length === 0 && (
+        {/* Until /auth/me answers we do not know which of these is true.
+            Rendering the signed-out state meanwhile makes the bar flicker on
+            every page load, so render neither. */}
+        {!loading && (user ? (
+          <>
+            {links.length === 0 && (
+              <Link to={dashboardFor(user.role)} className="au-nav__link">
+                Dashboard
+              </Link>
+            )}
+            <button type="button" className="au-nav__link au-nav__signout" onClick={handleSignOut}>
+              Log out
+            </button>
+          </>
+        ) : (
           <>
             <Link to="/login" className="au-nav__link">Log in</Link>
             <Link to="/signup" className="au-btn au-btn--primary au-btn--sm">
               Create an account <span aria-hidden="true">&rarr;</span>
             </Link>
           </>
-        )}
+        ))}
       </nav>
     </header>
   );
 };
 
-export const SiteFooter = () => (
-  <footer className="au-footer">
-    <div className="au-footer__inner">
-      <div className="au-footer__col">
-        <h2 className="au-footer__heading">Shippers</h2>
-        <ul className="au-footer__list">
-          <li><Link className="au-footer__link" to="/shipper/dashboard">Post a load</Link></li>
-          <li><Link className="au-footer__link" to="/shipper/your-loads">Your loads</Link></li>
-          <li><Link className="au-footer__link" to="/shipper/pending-matches">Pending matches</Link></li>
-        </ul>
-      </div>
+export const SiteFooter = () => {
+  const { user, loading, signOut } = useAuth();
+  const navigate = useNavigate();
+  const queues = (user && QUEUES[user.role]) || [];
 
-      <div className="au-footer__col">
-        <h2 className="au-footer__heading">Truckers</h2>
-        <ul className="au-footer__list">
-          <li><Link className="au-footer__link" to="/trucker/available-loads">Available loads</Link></li>
-          <li><Link className="au-footer__link" to="/trucker/matched-loads">Matched loads</Link></li>
-          <li><Link className="au-footer__link" to="/trucker/completed-loads">Completed</Link></li>
-        </ul>
-      </div>
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/');
+  };
 
-      <div className="au-footer__col">
-        <h2 className="au-footer__heading">Account</h2>
-        <ul className="au-footer__list">
-          <li><Link className="au-footer__link" to="/login">Log in</Link></li>
-          <li><Link className="au-footer__link" to="/signup">Sign up</Link></li>
-        </ul>
-      </div>
+  return (
+    <footer className="au-footer">
+      <div className="au-footer__inner">
+        {/* Only the column for the role actually signed in. A stranger gets no
+            queue links at all, and a shipper is never offered the trucker
+            board, which would only answer 403. */}
+        {!loading && queues.length > 0 && (
+          <div className="au-footer__col">
+            {/* "Your queues" matches the heading the dashboards already use,
+                and avoids a column headed "Your loads" whose first link is
+                also "Your loads". */}
+            <h2 className="au-footer__heading">Your queues</h2>
+            <ul className="au-footer__list">
+              {queues.slice(1).map((q) => (
+                <li key={q.to}>
+                  <Link className="au-footer__link" to={q.to}>{q.label}</Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
 
-      <div className="au-footer__brand">
-        <span className="au-nav__logo">
-          <span className="au-spectrum">Freight</span>Swipe
-        </span>
-        <p className="au-footer__legal">
-          &copy; {new Date().getFullYear()} FreightSwipe. Swipe-to-match freight booking.
-        </p>
+        {!loading && (
+          <div className="au-footer__col">
+            <h2 className="au-footer__heading">Account</h2>
+            <ul className="au-footer__list">
+              {user ? (
+                <>
+                  <li>
+                    <Link className="au-footer__link" to={dashboardFor(user.role)}>Dashboard</Link>
+                  </li>
+                  <li>
+                    <button type="button" className="au-footer__link au-footer__signout" onClick={handleSignOut}>
+                      Log out
+                    </button>
+                  </li>
+                </>
+              ) : (
+                <>
+                  <li><Link className="au-footer__link" to="/login">Log in</Link></li>
+                  <li><Link className="au-footer__link" to="/signup">Sign up</Link></li>
+                </>
+              )}
+            </ul>
+          </div>
+        )}
+
+        <div className="au-footer__brand">
+          <span className="au-nav__logo">
+            <span className="au-spectrum">Freight</span>Swipe
+          </span>
+          <p className="au-footer__legal">
+            &copy; {new Date().getFullYear()} FreightSwipe. Swipe-to-match freight booking.
+          </p>
+          {!loading && user && (
+            <p className="au-footer__legal">
+              Signed in as {user.name} · {user.role.toLowerCase()}
+            </p>
+          )}
+        </div>
       </div>
-    </div>
-  </footer>
-);
+    </footer>
+  );
+};
 
 /**
  * Standard interior page frame: nav, a titled header band, content, footer.
