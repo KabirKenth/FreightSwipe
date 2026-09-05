@@ -1,6 +1,11 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
+// Order matters: the Aurora layers must load after Bootstrap so the
+// override layer in aurora.css resolves without !important everywhere.
+import './styles/tokens.css';
+import './styles/aurora.css';
+import './App.css';
 
 // Import Pages
 import HomePage from './pages/HomePage';

@@ -1,13 +1,26 @@
+/* Base type and canvas live in src/styles/aurora.css, which is imported after
+   Bootstrap so it wins the cascade. This file only keeps what has to apply
+   before any component mounts.
+
+   index.js loads this file before App.js loads tokens.css, so the two values
+   below are the one place in the app that repeats a token literally --
+   #ffffff is Paper White and #001733 is Horizon Navy. They only exist to stop
+   a flash of the browser default before the token layer arrives. */
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  background-color: #ffffff;
+  color: #001733;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
 }
