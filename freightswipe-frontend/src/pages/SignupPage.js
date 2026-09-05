@@ -1,8 +1,8 @@
-
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { API_BASE } from '../api';
+import { TopNav, SiteFooter } from '../components/AppShell';
 
 const SignupPage = () => {
   const [name, setName] = useState('');
@@ -15,7 +15,11 @@ const SignupPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post(`${API_BASE}/auth/signup`, { name, email, password, role }, { withCredentials: true });
+      const response = await axios.post(
+        `${API_BASE}/auth/signup`,
+        { name, email, password, role },
+        { withCredentials: true }
+      );
       const { user } = response.data;
 
       if (user.role === 'SHIPPER') {
@@ -29,55 +33,84 @@ const SignupPage = () => {
   };
 
   return (
-    <div className="container mt-5">
-      <h2>Sign Up</h2>
-      {error && <div className="alert alert-danger">{error}</div>}
-      <form onSubmit={handleSubmit}>
-        <div className="mb-3">
-          <label className="form-label">Name</label>
-          <input
-            type="text"
-            className="form-control"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            autoComplete="name"
-            required
-          />
+    <div className="au-page">
+      <TopNav />
+
+      <main className="au-main">
+        <div className="au-container au-section">
+          <div className="au-column">
+            <span className="au-eyebrow">Account</span>
+            <h1 className="au-heading" style={{ marginBottom: 32 }}>Create an account.</h1>
+
+            {error && <div className="au-notice">{error}</div>}
+
+            <form onSubmit={handleSubmit}>
+              <div className="au-field">
+                <label className="au-label" htmlFor="signup-name">Name</label>
+                <input
+                  id="signup-name"
+                  type="text"
+                  className="au-input"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  autoComplete="name"
+                  required
+                />
+              </div>
+
+              <div className="au-field">
+                <label className="au-label" htmlFor="signup-email">Email address</label>
+                <input
+                  id="signup-email"
+                  type="email"
+                  className="au-input"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  autoComplete="email"
+                  required
+                />
+              </div>
+
+              <div className="au-field">
+                <label className="au-label" htmlFor="signup-password">Password</label>
+                <input
+                  id="signup-password"
+                  type="password"
+                  className="au-input"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  autoComplete="new-password"
+                  required
+                />
+              </div>
+
+              <div className="au-field">
+                <label className="au-label" htmlFor="signup-role">I am a</label>
+                <select
+                  id="signup-role"
+                  className="au-select"
+                  value={role}
+                  onChange={(e) => setRole(e.target.value)}
+                >
+                  <option value="SHIPPER">Shipper — I have loads to move</option>
+                  <option value="TRUCKER">Trucker — I have capacity to fill</option>
+                </select>
+                <span className="au-help">This decides which side of the match you see.</span>
+              </div>
+
+              <button type="submit" className="au-btn au-btn--primary au-btn--block">
+                Create account <span aria-hidden="true">&rarr;</span>
+              </button>
+            </form>
+
+            <p className="au-body-sm au-muted" style={{ marginTop: 24 }}>
+              Already have an account? <Link to="/login" className="au-link">Log in</Link>
+            </p>
+          </div>
         </div>
-        <div className="mb-3">
-          <label className="form-label">Email address</label>
-          <input
-            type="email"
-            className="form-control"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            autoComplete="email"
-            required
-          />
-        </div>
-        <div className="mb-3">
-          <label className="form-label">Password</label>
-          <input
-            type="password"
-            className="form-control"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            autoComplete="new-password"
-            required
-          />
-        </div>
-        <div className="mb-3">
-          <label className="form-label">Role</label>
-          <select className="form-select" value={role} onChange={(e) => setRole(e.target.value)}>
-            <option value="SHIPPER">Shipper</option>
-            <option value="TRUCKER">Trucker</option>
-          </select>
-        </div>
-        <button type="submit" className="btn btn-primary">Sign Up</button>
-      </form>
-      <p className="mt-3">
-        Already have an account? <Link to="/login">Login</Link>
-      </p>
+      </main>
+
+      <SiteFooter />
     </div>
   );
 };

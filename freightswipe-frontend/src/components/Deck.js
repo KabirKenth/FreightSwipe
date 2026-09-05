@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { useSprings, animated, to as interpolate } from '@react-spring/web'
 import { useDrag } from '@use-gesture/react'
 import { Link } from 'react-router-dom'
+import { formatRoute, formatEndpoints, formatWeight, formatMoney } from './Record'
 
 // Resting position for card i. The offset is capped so a 17-card deck does not
 // stack 68px up the page, and there is no `delay` -- delaying the initial set is
@@ -14,6 +15,15 @@ const to = (i) => ({
 })
 const trans = (r, s) =>
   `perspective(1500px) rotateY(${r / 10}deg) rotateZ(${r}deg) scale(${s})`
+
+/** One label-over-figure row in the card's hairline-separated fact list. */
+const Fact = ({ label, value }) =>
+  value === undefined || value === null || value === '' ? null : (
+    <div className="swipe-card__fact">
+      <dt>{label}</dt>
+      <dd>{value}</dd>
+    </div>
+  )
 
 function Deck({ data, onSwipe }) {
   const [gone] = useState(() => new Set())
@@ -66,7 +76,11 @@ function Deck({ data, onSwipe }) {
     <div className='cardContainer'>
         {props.map(({ x, y, rot, scale }, i) => {
           const item = data[i];
+          // A trucker swiping loads gets the load itself; a shipper swiping
+          // pending matches gets a match wrapping the load.
           const isLoad = !item.trucker;
+          const load = isLoad ? item : item.load;
+
           return (
             <animated.div className="deck" key={i} style={{ x, y }}>
               <animated.div
@@ -75,28 +89,58 @@ function Deck({ data, onSwipe }) {
                   transform: interpolate([rot, scale], trans),
                 }} >
                 <div className='swipe-card'>
-                  {isLoad ? (
-                    <>
-                      <h3>{item.origin.city}, {item.origin.province} &rarr; {item.destination.city}, {item.destination.province}</h3>
-                      <p>{item.origin.address} to {item.destination.address}</p>
-                      <p>Weight: {item.weight} lbs</p>
-                      <p>Budget: ${item.budget}</p>
-                      <p>Deadline: {new Date(item.deadline).toLocaleDateString()}</p>
-                      {item.description && <p>{item.description}</p>}
-                    </>
-                  ) : (
-                    <>
-                      <h5>{item.load.origin?.city}, {item.load.origin?.province} &rarr; {item.load.destination?.city}, {item.load.destination?.province}</h5>
-                      <p>Trucker: {item.trucker.name}</p>
-                      <p>Weight: {item.load.weight} lbs</p>
-                      <p>Budget: ${item.load.budget}</p>
-                      <p>Status: {item.status}</p>
-                      <Link to={`/reviews/${item.trucker.id}`} className="btn btn-info btn-sm mt-2">View Reviews</Link>
-                    </>
+                  <span className="swipe-card__eyebrow">
+                    {isLoad ? 'Available load' : 'Interested trucker'}
+                  </span>
+
+                  <h3>{formatRoute(load.origin, load.destination)}</h3>
+                  <p className="swipe-card__endpoints">
+                    {formatEndpoints(load.origin, load.destination)}
+                  </p>
+
+                  <dl className="swipe-card__facts">
+                    {!isLoad && <Fact label="Trucker" value={item.trucker.name} />}
+                    <Fact label="Weight" value={formatWeight(load.weight)} />
+                    <Fact label="Budget" value={formatMoney(load.budget)} />
+                    {isLoad && (
+                      <Fact
+                        label="Deadline"
+                        value={new Date(load.deadline).toLocaleDateString()}
+                      />
+                    )}
+                    {!isLoad && <Fact label="Status" value={String(item.status).replace(/_/g, ' ')} />}
+                  </dl>
+
+                  {isLoad && item.description && (
+                    <p className="swipe-card__note">{item.description}</p>
                   )}
+
+                  {!isLoad && (
+                    <Link
+                      to={`/reviews/${item.trucker.id}`}
+                      className="au-btn au-btn--secondary au-btn--sm"
+                    >
+                      View reviews
+                    </Link>
+                  )}
+
+                  <div className="swipe-card__spacer" />
+
                   <div className="buttons">
-                    <button style={{ backgroundColor: '#FF6347' }} onClick={() => triggerSwipe(-1, i)}>Decline</button>
-                    <button style={{ backgroundColor: '#2E8B57' }} onClick={() => triggerSwipe(1, i)}>Accept</button>
+                    <button
+                      type="button"
+                      className="swipe-decline"
+                      onClick={() => triggerSwipe(-1, i)}
+                    >
+                      Pass
+                    </button>
+                    <button
+                      type="button"
+                      className="swipe-accept"
+                      onClick={() => triggerSwipe(1, i)}
+                    >
+                      Accept <span aria-hidden="true">&rarr;</span>
+                    </button>
                   </div>
                 </div>
               </animated.div>

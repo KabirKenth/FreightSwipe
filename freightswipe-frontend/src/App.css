@@ -1,17 +1,22 @@
-/* Swipe deck.
-   Class names here are deliberately specific: a generic `.card` rule collided with
-   Bootstrap's own .card and resized every card in the app. */
+/* Swipe deck, in the Aurora system.
+
+   Class names here are deliberately specific: a generic `.card` rule collided
+   with Bootstrap's own .card and resized every card in the app.
+
+   Note this file is now imported from App.js — it previously was not, so the
+   deck rendered with no styling at all. */
 
 .cardContainer {
   position: relative;
   width: 100%;
-  max-width: 340px;
-  height: 470px;
+  max-width: 360px;
+  height: 500px;
   margin: 0 auto;
 }
 
-/* react-spring writes `transform: translate3d(...)` onto this element, which would
-   overwrite any transform set here -- so centring is done with flex, not translateX. */
+/* react-spring writes `transform: translate3d(...)` onto this element, which
+   would overwrite any transform set here -- so centring is done with flex,
+   not translateX. */
 .deck {
   position: absolute;
   top: 0;
@@ -27,51 +32,137 @@
   will-change: transform;
 }
 
+/* Depth by surface, not by blur: the resting card is Paper White inside a
+   Mist hairline, and the stack beneath it reads through the 4px offsets that
+   Deck.js applies. */
 .swipe-card {
-  background-color: #fff;
+  background-color: var(--surface-paper-white-canvas);
   width: 100%;
-  max-width: 320px;
-  min-height: 440px;
-  padding: 20px;
-  border-radius: 16px;
-  border: 1px solid #e5e7eb;
-  box-shadow: 0 12px 32px -12px rgba(50, 50, 73, 0.35);
+  max-width: 340px;
+  min-height: 468px;
+  padding: var(--card-padding);
+  border-radius: var(--radius-cards);
+  border: 1px solid var(--color-mist);
+  box-shadow: none;
   text-align: left;
   overflow-wrap: break-word;
+  display: flex;
+  flex-direction: column;
+}
+
+.swipe-card__eyebrow {
+  display: block;
+  font-size: var(--text-caption);
+  line-height: var(--leading-caption);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--color-slate-whisper);
+  margin-bottom: var(--spacing-12);
 }
 
 .swipe-card h3,
 .swipe-card h5 {
-  font-size: 1rem;
-  line-height: 1.4;
-  margin-bottom: 12px;
+  font-size: var(--text-subheading-lg);
+  line-height: var(--leading-subheading-lg);
+  letter-spacing: var(--tracking-subheading-lg);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-horizon-navy);
+  margin: 0 0 var(--spacing-8);
 }
 
-.swipe-card p {
-  margin-bottom: 6px;
-  color: #4b5563;
-  font-size: 0.9rem;
+.swipe-card__endpoints {
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-body-sm);
+  color: var(--color-slate-whisper);
+  margin: 0 0 var(--spacing-24);
 }
 
-.buttons {
-  margin-top: 16px;
+/* Figures stack as label-over-value rows, hairline separated — the same
+   pattern as the hero stats bar and the dashboard record cards. */
+.swipe-card__facts {
+  border-top: 1px solid var(--color-mist);
+  margin: 0 0 var(--spacing-16);
+  padding: 0;
+  list-style: none;
+}
+
+.swipe-card__fact {
   display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  justify-content: center;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--spacing-16);
+  padding: var(--spacing-12) 0;
+  border-bottom: 1px solid var(--color-mist);
+}
+
+.swipe-card__fact dt {
+  font-size: var(--text-caption);
+  line-height: var(--leading-caption);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: var(--tracking-stat-label);
+  text-transform: uppercase;
+  color: var(--color-slate-whisper);
+  margin: 0;
+}
+
+.swipe-card__fact dd {
+  font-size: var(--text-body);
+  line-height: var(--leading-body-sm);
+  color: var(--color-horizon-navy);
+  margin: 0;
+  text-align: right;
+}
+
+.swipe-card__note {
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-body-sm);
+  color: var(--color-slate-whisper);
+  margin: 0 0 var(--spacing-16);
+}
+
+.swipe-card__spacer { flex: 1 1 auto; }
+
+/* Two actions, one of them Signal Blue. Decline is the bordered ghost —
+   the palette has no red to spend on it. */
+.buttons {
+  margin-top: var(--spacing-16);
+  display: flex;
+  gap: var(--spacing-12);
 }
 
 .buttons button {
-  flex: 1 1 120px;
-  padding: 10px;
-  border-radius: 6px;
-  border: none;
-  color: #fff;
-  font-size: 16px;
-  font-weight: 600;
-  transition: transform 200ms;
+  flex: 1 1 0;
+  padding: 14px var(--spacing-16);
+  border-radius: var(--radius-buttons);
+  border: 1px solid transparent;
+  font-family: var(--font-inter);
+  font-size: var(--text-body-sm);
+  font-weight: var(--font-weight-medium);
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: none;
+  transition: background-color 160ms ease, border-color 160ms ease;
 }
 
-.buttons button:hover {
-  transform: scale(1.03);
+.buttons .swipe-decline {
+  background: var(--color-mist);
+  color: var(--color-horizon-navy);
+  border-color: var(--color-mist);
+}
+
+.buttons .swipe-decline:hover {
+  background: var(--color-fog);
+  border-color: var(--color-fog);
+}
+
+.buttons .swipe-accept {
+  background: var(--color-signal-blue);
+  color: var(--color-paper-white);
+  border-color: var(--color-signal-blue);
+}
+
+.buttons .swipe-accept:hover {
+  background: var(--color-signal-blue-pressed);
+  border-color: var(--color-signal-blue-pressed);
 }

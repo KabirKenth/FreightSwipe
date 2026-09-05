@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useLoadScript } from '@react-google-maps/api';
@@ -49,9 +48,7 @@ const CreateLoadForm = ({ onNewLoad }) => {
     setDestinationCountry(a.country);
   };
 
-  const ensureString = (value) => {
-    return value != null ? String(value).trim() : '';
-  };
+  const ensureString = (value) => (value != null ? String(value).trim() : '');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -63,7 +60,7 @@ const CreateLoadForm = ({ onNewLoad }) => {
       city: ensureString(originCity),
       province: ensureString(originProvince),
       postalCode: ensureString(originPostalCode),
-      country: ensureString(originCountry)
+      country: ensureString(originCountry),
     };
 
     const destinationData = {
@@ -71,7 +68,7 @@ const CreateLoadForm = ({ onNewLoad }) => {
       city: ensureString(destinationCity),
       province: ensureString(destinationProvince),
       postalCode: ensureString(destinationPostalCode),
-      country: ensureString(destinationCountry)
+      country: ensureString(destinationCountry),
     };
 
     if (!originData.address || !originData.city || !originData.province || !originData.postalCode || !originData.country) {
@@ -130,7 +127,7 @@ const CreateLoadForm = ({ onNewLoad }) => {
         weight: parseFloat(weight),
         budget: parseFloat(budget),
         deadline: selectedDate.toISOString(),
-        description: ensureString(description)
+        description: ensureString(description),
       }, { withCredentials: true });
 
       onNewLoad(response.data);
@@ -148,7 +145,7 @@ const CreateLoadForm = ({ onNewLoad }) => {
       setBudget('');
       setDeadline('');
       setDescription('');
-      setSuccess('Load Created Successfully!');
+      setSuccess('Load created.');
       setTimeout(() => setSuccess(''), 3000);
     } catch (err) {
       console.error('Error creating load:', err);
@@ -162,159 +159,210 @@ const CreateLoadForm = ({ onNewLoad }) => {
   const mapsReady = isLoaded && !loadError;
 
   return (
-    <div className="card mt-4">
-      <div className="card-body">
-        <h5 className="card-title">Create New Load</h5>
-        {error && <div className="alert alert-danger">{error}</div>}
-        {success && <div className="alert alert-primary">{success}</div>}
-        <form onSubmit={handleSubmit}>
-          <h6 className="text-muted mt-2">Pickup</h6>
+    <div className="au-card">
+      {error && <div className="au-notice">{error}</div>}
+      {success && <div className="au-notice au-notice--signal">{success}</div>}
+
+      <form onSubmit={handleSubmit}>
+        {/* ---------- Pickup ---------- */}
+        <fieldset className="au-fieldset">
+          <legend className="au-fieldset__legend">Pickup</legend>
+
           <PlaceAutocomplete ready={mapsReady} onSelect={applyOrigin} />
-          <div className="mb-3">
-            <label className="form-label">Origin Address</label>
+
+          <div className="au-field">
+            <label className="au-label" htmlFor="origin-address">Street address</label>
             <input
+              id="origin-address"
               type="text"
-              className="form-control"
+              className="au-input"
               value={originStreet}
               onChange={(e) => setOriginStreet(e.target.value)}
               required
             />
           </div>
-          <div className="mb-3">
-            <label className="form-label">Origin City</label>
-            <input
-              type="text"
-              className="form-control"
-              value={originCity}
-              onChange={(e) => setOriginCity(e.target.value)}
-              required
-            />
-          </div>
-          <div className="mb-3">
-            <label className="form-label">Origin State/Province</label>
-            <input
-              type="text"
-              className="form-control"
-              value={originProvince}
-              onChange={(e) => setOriginProvince(e.target.value)}
-              required
-            />
-          </div>
-          <div className="mb-3">
-            <label className="form-label">Origin Postal Code</label>
-            <input
-              type="text"
-              className="form-control"
-              value={originPostalCode}
-              onChange={(e) => setOriginPostalCode(e.target.value)}
-              required
-            />
-          </div>
-          <div className="mb-3">
-            <label className="form-label">Origin Country</label>
-            <input
-              type="text"
-              className="form-control"
-              value={originCountry}
-              onChange={(e) => setOriginCountry(e.target.value)}
-              required
-            />
-          </div>
 
-          <h6 className="text-muted mt-4">Delivery</h6>
+          <div className="au-grid-2">
+            <div className="au-field">
+              <label className="au-label" htmlFor="origin-city">City</label>
+              <input
+                id="origin-city"
+                type="text"
+                className="au-input"
+                value={originCity}
+                onChange={(e) => setOriginCity(e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="au-field">
+              <label className="au-label" htmlFor="origin-province">State / province</label>
+              <input
+                id="origin-province"
+                type="text"
+                className="au-input"
+                value={originProvince}
+                onChange={(e) => setOriginProvince(e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="au-field">
+              <label className="au-label" htmlFor="origin-postal">Postal code</label>
+              <input
+                id="origin-postal"
+                type="text"
+                className="au-input"
+                value={originPostalCode}
+                onChange={(e) => setOriginPostalCode(e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="au-field">
+              <label className="au-label" htmlFor="origin-country">Country</label>
+              <input
+                id="origin-country"
+                type="text"
+                className="au-input"
+                value={originCountry}
+                onChange={(e) => setOriginCountry(e.target.value)}
+                required
+              />
+            </div>
+          </div>
+        </fieldset>
+
+        {/* ---------- Delivery ---------- */}
+        <fieldset className="au-fieldset">
+          <legend className="au-fieldset__legend">Delivery</legend>
+
           <PlaceAutocomplete ready={mapsReady} onSelect={applyDestination} />
-          <div className="mb-3">
-            <label className="form-label">Destination Address</label>
+
+          <div className="au-field">
+            <label className="au-label" htmlFor="destination-address">Street address</label>
             <input
+              id="destination-address"
               type="text"
-              className="form-control"
+              className="au-input"
               value={destinationStreet}
               onChange={(e) => setDestinationStreet(e.target.value)}
               required
             />
           </div>
-          <div className="mb-3">
-            <label className="form-label">Destination City</label>
-            <input
-              type="text"
-              className="form-control"
-              value={destinationCity}
-              onChange={(e) => setDestinationCity(e.target.value)}
-              required
-            />
+
+          <div className="au-grid-2">
+            <div className="au-field">
+              <label className="au-label" htmlFor="destination-city">City</label>
+              <input
+                id="destination-city"
+                type="text"
+                className="au-input"
+                value={destinationCity}
+                onChange={(e) => setDestinationCity(e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="au-field">
+              <label className="au-label" htmlFor="destination-province">State / province</label>
+              <input
+                id="destination-province"
+                type="text"
+                className="au-input"
+                value={destinationProvince}
+                onChange={(e) => setDestinationProvince(e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="au-field">
+              <label className="au-label" htmlFor="destination-postal">Postal code</label>
+              <input
+                id="destination-postal"
+                type="text"
+                className="au-input"
+                value={destinationPostalCode}
+                onChange={(e) => setDestinationPostalCode(e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="au-field">
+              <label className="au-label" htmlFor="destination-country">Country</label>
+              <input
+                id="destination-country"
+                type="text"
+                className="au-input"
+                value={destinationCountry}
+                onChange={(e) => setDestinationCountry(e.target.value)}
+                required
+              />
+            </div>
           </div>
-          <div className="mb-3">
-            <label className="form-label">Destination State/Province</label>
-            <input
-              type="text"
-              className="form-control"
-              value={destinationProvince}
-              onChange={(e) => setDestinationProvince(e.target.value)}
-              required
-            />
-          </div>
-          <div className="mb-3">
-            <label className="form-label">Destination Postal Code</label>
-            <input
-              type="text"
-              className="form-control"
-              value={destinationPostalCode}
-              onChange={(e) => setDestinationPostalCode(e.target.value)}
-              required
-            />
-          </div>
-          <div className="mb-3">
-            <label className="form-label">Destination Country</label>
-            <input
-              type="text"
-              className="form-control"
-              value={destinationCountry}
-              onChange={(e) => setDestinationCountry(e.target.value)}
-              required
-            />
+        </fieldset>
+
+        {/* ---------- The load ---------- */}
+        <fieldset className="au-fieldset">
+          <legend className="au-fieldset__legend">The load</legend>
+
+          <div className="au-grid-2">
+            <div className="au-field">
+              <label className="au-label" htmlFor="load-weight">Weight (lbs)</label>
+              <input
+                id="load-weight"
+                type="number"
+                className="au-input"
+                value={weight}
+                onChange={(e) => setWeight(e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="au-field">
+              <label className="au-label" htmlFor="load-budget">Budget ($)</label>
+              <input
+                id="load-budget"
+                type="number"
+                className="au-input"
+                value={budget}
+                onChange={(e) => setBudget(e.target.value)}
+                required
+              />
+            </div>
           </div>
 
-          <div className="mb-3">
-            <label className="form-label">Weight (lbs)</label>
+          <div className="au-field">
+            <label className="au-label" htmlFor="load-deadline">Deadline</label>
             <input
-              type="number"
-              className="form-control"
-              value={weight}
-              onChange={(e) => setWeight(e.target.value)}
-              required
-            />
-          </div>
-          <div className="mb-3">
-            <label className="form-label">Budget ($)</label>
-            <input
-              type="number"
-              className="form-control"
-              value={budget}
-              onChange={(e) => setBudget(e.target.value)}
-              required
-            />
-          </div>
-          <div className="mb-3">
-            <label className="form-label">Deadline</label>
-            <input
+              id="load-deadline"
               type="date"
-              className="form-control"
+              className="au-input"
               value={deadline}
               onChange={(e) => setDeadline(e.target.value)}
               required
             />
+            <span className="au-help">The day it has to be delivered by.</span>
           </div>
-          <div className="mb-3">
-            <label className="form-label">Description</label>
+
+          <div className="au-field">
+            <label className="au-label" htmlFor="load-description">Description</label>
             <textarea
-              className="form-control"
+              id="load-description"
+              className="au-textarea"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-            ></textarea>
+            />
+            <span className="au-help">
+              Optional. Anything a trucker should know before they swipe.
+            </span>
           </div>
-          <button type="submit" className="btn btn-primary">Create Load</button>
-        </form>
-      </div>
+        </fieldset>
+
+        <button type="submit" className="au-btn au-btn--primary">
+          Post this load <span aria-hidden="true">&rarr;</span>
+        </button>
+      </form>
     </div>
   );
 };

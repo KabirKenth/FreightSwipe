@@ -90,10 +90,10 @@ export default function PlaceAutocomplete({ ready, onSelect }) {
   }, [ready]);
 
   return (
-    <div className={available ? 'mb-2' : ''}>
+    <div className="au-field" style={available ? undefined : { margin: 0 }}>
       <div ref={hostRef} />
       {available && (
-        <div className="form-text">Search for an address to fill the fields below.</div>
+        <span className="au-help">Search for an address to fill the fields below.</span>
       )}
     </div>
   );

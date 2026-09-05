@@ -1,8 +1,8 @@
-
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { API_BASE } from '../api';
+import { TopNav, SiteFooter } from '../components/AppShell';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
@@ -13,9 +13,13 @@ const LoginPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post(`${API_BASE}/auth/login`, { email, password }, { withCredentials: true });
+      const response = await axios.post(
+        `${API_BASE}/auth/login`,
+        { email, password },
+        { withCredentials: true }
+      );
       const { user } = response.data;
-      // The backend now sets an HttpOnly cookie, so we don't need to store the token in localStorage
+      // The backend sets an HttpOnly cookie, so no token is stored client-side.
 
       if (user.role === 'SHIPPER') {
         navigate('/shipper/dashboard');
@@ -30,37 +34,57 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="container mt-5">
-      <h2>Login</h2>
-      {error && <div className="alert alert-danger">{error}</div>}
-      <form onSubmit={handleSubmit}>
-        <div className="mb-3">
-          <label className="form-label">Email address</label>
-          <input
-            type="email"
-            className="form-control"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            autoComplete="email"
-            required
-          />
+    <div className="au-page">
+      <TopNav />
+
+      <main className="au-main">
+        <div className="au-container au-section">
+          <div className="au-column">
+            <span className="au-eyebrow">Account</span>
+            <h1 className="au-heading" style={{ marginBottom: 32 }}>Log in.</h1>
+
+            {error && <div className="au-notice">{error}</div>}
+
+            <form onSubmit={handleSubmit}>
+              <div className="au-field">
+                <label className="au-label" htmlFor="login-email">Email address</label>
+                <input
+                  id="login-email"
+                  type="email"
+                  className="au-input"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  autoComplete="email"
+                  required
+                />
+              </div>
+
+              <div className="au-field">
+                <label className="au-label" htmlFor="login-password">Password</label>
+                <input
+                  id="login-password"
+                  type="password"
+                  className="au-input"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  autoComplete="current-password"
+                  required
+                />
+              </div>
+
+              <button type="submit" className="au-btn au-btn--primary au-btn--block">
+                Log in <span aria-hidden="true">&rarr;</span>
+              </button>
+            </form>
+
+            <p className="au-body-sm au-muted" style={{ marginTop: 24 }}>
+              Don’t have an account? <Link to="/signup" className="au-link">Sign up</Link>
+            </p>
+          </div>
         </div>
-        <div className="mb-3">
-          <label className="form-label">Password</label>
-          <input
-            type="password"
-            className="form-control"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            autoComplete="current-password"
-            required
-          />
-        </div>
-        <button type="submit" className="btn btn-primary">Login</button>
-      </form>
-      <p className="mt-3">
-        Don't have an account? <Link to="/signup">Sign up</Link>
-      </p>
+      </main>
+
+      <SiteFooter />
     </div>
   );
 };
