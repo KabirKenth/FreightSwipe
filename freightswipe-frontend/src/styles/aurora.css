@@ -1546,3 +1546,32 @@ gmp-placeautocomplete {
   flex-wrap: wrap;
   gap: var(--spacing-12);
 }
+
+/* ---------------------------------------------------------------
+   19. Sign out
+
+   Signing out is an action, so it has to be a <button> for keyboard
+   and screen-reader users -- but it reads as one of the ghost text
+   links beside it, not as a filled control. These reset the button
+   chrome and inherit the link treatment; the no-ghost-buttons rule
+   governs .au-btn, which this deliberately is not.
+   --------------------------------------------------------------- */
+
+.au-nav__signout,
+.au-footer__signout {
+  background: none;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.au-nav__signout { padding: var(--spacing-4) 0; }
+
+.au-nav__signout:hover,
+.au-footer__signout:hover {
+  text-decoration: underline;
+}

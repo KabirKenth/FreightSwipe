@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { API_BASE, errorMessage } from '../api';
 import { TopNav, SiteFooter } from '../components/AppShell';
+import { useAuth, dashboardFor } from '../auth';
 import Reveal from '../components/Reveal';
 
 /**
@@ -53,6 +54,7 @@ const STATS = [
 
 const HomePage = () => {
   const navigate = useNavigate();
+  const { user, loading, setUser } = useAuth();
   const [loadingRole, setLoadingRole] = useState(null);
   const [error, setError] = useState('');
 
@@ -60,8 +62,9 @@ const HomePage = () => {
     setError('');
     setLoadingRole(role);
     try {
-      await axios.post(`${API_BASE}/auth/demo`, { role }, { withCredentials: true });
-      navigate(role === 'SHIPPER' ? '/shipper/dashboard' : '/trucker/dashboard');
+      const { data } = await axios.post(`${API_BASE}/auth/demo`, { role }, { withCredentials: true });
+      setUser(data.user);
+      navigate(dashboardFor(data.user.role));
     } catch (err) {
       setError(errorMessage(err, 'Could not start the demo. Please try again.'));
       setLoadingRole(null);
@@ -87,14 +90,26 @@ const HomePage = () => {
                 Shippers post loads. Truckers swipe through the ones that fit. Both sides
                 confirm pickup, track delivery, and review each other when it is done.
               </p>
-              <div className="au-actions">
-                <Link to="/signup" className="au-btn au-btn--primary">
-                  Create an account <span aria-hidden="true">&rarr;</span>
-                </Link>
-                <Link to="/login" className="au-btn au-btn--secondary">
-                  Log in
-                </Link>
-              </div>
+              {/* Held back until /auth/me answers, so the hero does not flash
+                  "Create an account" at someone who already has one. */}
+              {!loading && (
+                <div className="au-actions">
+                  {user ? (
+                    <Link to={dashboardFor(user.role)} className="au-btn au-btn--primary">
+                      Go to your dashboard <span aria-hidden="true">&rarr;</span>
+                    </Link>
+                  ) : (
+                    <>
+                      <Link to="/signup" className="au-btn au-btn--primary">
+                        Create an account <span aria-hidden="true">&rarr;</span>
+                      </Link>
+                      <Link to="/login" className="au-btn au-btn--secondary">
+                        Log in
+                      </Link>
+                    </>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Experience card */}
@@ -106,12 +121,26 @@ const HomePage = () => {
                   <img className="au-experience__figure" src="/truck.jpg" alt="" /> */}
               <div className="au-experience__body">
                 <div>
-                  <span className="au-experience__label">Experiencing</span>
-                  <p className="au-experience__title">Ride along with a demo account</p>
+                  <span className="au-experience__label">
+                    {user ? 'Signed in' : 'Experiencing'}
+                  </span>
+                  <p className="au-experience__title">
+                    {user ? `Pick up where you left off, ${user.name}` : 'Ride along with a demo account'}
+                  </p>
                 </div>
-                <a className="au-arrow-btn" href="#demo" aria-label="Jump to the demo accounts">
-                  <span aria-hidden="true">&rarr;</span>
-                </a>
+                {user ? (
+                  <Link
+                    className="au-arrow-btn"
+                    to={dashboardFor(user.role)}
+                    aria-label="Go to your dashboard"
+                  >
+                    <span aria-hidden="true">&rarr;</span>
+                  </Link>
+                ) : (
+                  <a className="au-arrow-btn" href="#demo" aria-label="Jump to the demo accounts">
+                    <span aria-hidden="true">&rarr;</span>
+                  </a>
+                )}
               </div>
             </aside>
           </div>
@@ -166,46 +195,65 @@ const HomePage = () => {
           <div className="au-container">
             <div className="au-editorial">
               <div>
-                <span className="au-eyebrow">Try it</span>
-                <h2 className="au-heading-sm">Open a seeded account.</h2>
+                <span className="au-eyebrow">{user ? 'Your account' : 'Try it'}</span>
+                <h2 className="au-heading-sm">
+                  {user ? 'Carry on where you left off.' : 'Open a seeded account.'}
+                </h2>
                 <p className="au-body au-muted" style={{ marginTop: 16, maxWidth: '38ch' }}>
-                  Both demo accounts come loaded with sample loads, matches and reviews. No
-                  signup, no email, nothing to clean up afterwards.
+                  {user
+                    ? 'You are already signed in, so the demo accounts are not offered here — opening one would sign you out of your own.'
+                    : 'Both demo accounts come loaded with sample loads, matches and reviews. No signup, no email, nothing to clean up afterwards.'}
                 </p>
               </div>
 
               <div>
-                <div className="au-card au-card--raised">
-                  {error && <div className="au-notice">{error}</div>}
-
-                  <span className="au-eyebrow">Choose a side</span>
-
-                  <div className="au-stack au-stack--sm">
-                    <button
-                      type="button"
+                {loading ? null : user ? (
+                  <div className="au-card au-card--raised">
+                    <span className="au-eyebrow">Signed in as</span>
+                    <p className="au-subheading" style={{ marginBottom: 4 }}>{user.name}</p>
+                    <p className="au-body-sm au-muted" style={{ marginBottom: 24 }}>
+                      {user.email} · {user.role.toLowerCase()}
+                    </p>
+                    <Link
+                      to={dashboardFor(user.role)}
                       className="au-btn au-btn--primary au-btn--block"
-                      onClick={() => enterDemo('SHIPPER')}
-                      disabled={loadingRole !== null}
                     >
-                      {loadingRole === 'SHIPPER' ? 'Starting…' : 'Explore as a shipper'}
-                      {loadingRole !== 'SHIPPER' && <span aria-hidden="true">&rarr;</span>}
-                    </button>
-
-                    <button
-                      type="button"
-                      className="au-btn au-btn--secondary au-btn--block"
-                      onClick={() => enterDemo('TRUCKER')}
-                      disabled={loadingRole !== null}
-                    >
-                      {loadingRole === 'TRUCKER' ? 'Starting…' : 'Explore as a trucker'}
-                    </button>
+                      Go to your dashboard <span aria-hidden="true">&rarr;</span>
+                    </Link>
                   </div>
+                ) : (
+                  <div className="au-card au-card--raised">
+                    {error && <div className="au-notice">{error}</div>}
 
-                  <p className="au-body-sm au-muted" style={{ marginTop: 20 }}>
-                    Or <Link to="/login" className="au-link">log in</Link> to an account you
-                    already have.
-                  </p>
-                </div>
+                    <span className="au-eyebrow">Choose a side</span>
+
+                    <div className="au-stack au-stack--sm">
+                      <button
+                        type="button"
+                        className="au-btn au-btn--primary au-btn--block"
+                        onClick={() => enterDemo('SHIPPER')}
+                        disabled={loadingRole !== null}
+                      >
+                        {loadingRole === 'SHIPPER' ? 'Starting…' : 'Explore as a shipper'}
+                        {loadingRole !== 'SHIPPER' && <span aria-hidden="true">&rarr;</span>}
+                      </button>
+
+                      <button
+                        type="button"
+                        className="au-btn au-btn--secondary au-btn--block"
+                        onClick={() => enterDemo('TRUCKER')}
+                        disabled={loadingRole !== null}
+                      >
+                        {loadingRole === 'TRUCKER' ? 'Starting…' : 'Explore as a trucker'}
+                      </button>
+                    </div>
+
+                    <p className="au-body-sm au-muted" style={{ marginTop: 20 }}>
+                      Or <Link to="/login" className="au-link">log in</Link> to an account you
+                      already have.
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
           </div>

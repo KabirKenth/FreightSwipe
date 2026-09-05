@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { API_BASE } from '../api';
 import { TopNav, SiteFooter } from '../components/AppShell';
+import { useAuth, dashboardFor } from '../auth';
 
 const SignupPage = () => {
   const [name, setName] = useState('');
@@ -11,6 +12,7 @@ const SignupPage = () => {
   const [role, setRole] = useState('SHIPPER');
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const { setUser } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -21,12 +23,8 @@ const SignupPage = () => {
         { withCredentials: true }
       );
       const { user } = response.data;
-
-      if (user.role === 'SHIPPER') {
-        navigate('/shipper/dashboard');
-      } else if (user.role === 'TRUCKER') {
-        navigate('/trucker/dashboard');
-      }
+      setUser(user);
+      navigate(dashboardFor(user.role));
     } catch (err) {
       setError('Email already exists');
     }

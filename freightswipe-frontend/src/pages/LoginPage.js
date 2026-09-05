@@ -3,12 +3,14 @@ import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { API_BASE } from '../api';
 import { TopNav, SiteFooter } from '../components/AppShell';
+import { useAuth, dashboardFor } from '../auth';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const { setUser } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -20,14 +22,10 @@ const LoginPage = () => {
       );
       const { user } = response.data;
       // The backend sets an HttpOnly cookie, so no token is stored client-side.
-
-      if (user.role === 'SHIPPER') {
-        navigate('/shipper/dashboard');
-      } else if (user.role === 'TRUCKER') {
-        navigate('/trucker/dashboard');
-      } else if (user.role === 'ADMIN') {
-        navigate('/admin/dashboard');
-      }
+      // Seed the session context from the response rather than waiting for the
+      // next /auth/me, so the nav and footer switch over immediately.
+      setUser(user);
+      navigate(dashboardFor(user.role));
     } catch (err) {
       setError('Invalid credentials');
     }
