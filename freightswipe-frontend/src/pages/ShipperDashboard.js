@@ -1,39 +1,54 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import CreateLoadForm from '../components/CreateLoadForm';
+import AppShell from '../components/AppShell';
+
+const QUEUES = [
+  { to: '/shipper/your-loads', label: 'Your loads' },
+  { to: '/shipper/pending-matches', label: 'Pending matches' },
+  { to: '/shipper/matched-loads', label: 'Matched loads' },
+  { to: '/shipper/in-transit-loads', label: 'Loads in transit' },
+  { to: '/shipper/completed-loads', label: 'Completed loads' },
+];
 
 /**
- * The main dashboard for shippers.
- * Displays the Create Load form and navigation links to other shipper-related pages.
+ * The main dashboard for shippers: post a load on the right, jump to any
+ * queue from the index on the left.
  */
 const ShipperDashboard = () => {
   const navigate = useNavigate();
 
-  /**
-   * Handles the creation of a new load.
-   * Navigates the user to the "Your Loads" page to see the newly created load.
-   * @param {object} newLoad - The newly created load object.
-   */
-  const handleNewLoad = (newLoad) => {
+  /** After a load is created, drop the shipper into the list it now appears in. */
+  const handleNewLoad = () => {
     navigate('/shipper/your-loads');
   };
 
   return (
-    <div className="container mt-5">
-      <h2>Shipper Dashboard</h2>
+    <AppShell
+      eyebrow="Shipper"
+      title="Post a load."
+      standfirst="Give the lane, the weight and the day it has to be there. Truckers see it the moment it goes up."
+    >
+      <div className="au-editorial" style={{ paddingBottom: 48 }}>
+        <div>
+          <span className="au-eyebrow">Your queues</span>
+          <ul className="au-index">
+            {QUEUES.map((queue) => (
+              <li key={queue.to}>
+                <Link to={queue.to} className="au-index__link">
+                  {queue.label}
+                  <span className="au-index__arrow" aria-hidden="true">&rarr;</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
 
-      {/* --- Create New Load Form --- */}
-      <CreateLoadForm onNewLoad={handleNewLoad} />
-
-      {/* --- Navigation Links --- */}
-      <div className="list-group mt-4">
-        <Link to="/shipper/your-loads" className="list-group-item list-group-item-action">Your Loads</Link>
-        <Link to="/shipper/pending-matches" className="list-group-item list-group-item-action">Pending Matches</Link>
-        <Link to="/shipper/matched-loads" className="list-group-item list-group-item-action">Matched Loads</Link>
-        <Link to="/shipper/in-transit-loads" className="list-group-item list-group-item-action">Loads In Transit</Link>
-        <Link to="/shipper/completed-loads" className="list-group-item list-group-item-action">Completed Loads</Link>
+        <div>
+          <CreateLoadForm onNewLoad={handleNewLoad} />
+        </div>
       </div>
-    </div>
+    </AppShell>
   );
 };
 

@@ -2,7 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { API_BASE } from '../../api';
+import AppShell from '../../components/AppShell';
+import Record, { formatRoute, formatEndpoints } from '../../components/Record';
 
+/**
+ * Booked loads waiting on both sides to confirm the truck has rolled.
+ */
 const MatchedLoads = () => {
   const [matchedLoads, setMatchedLoads] = useState([]);
   const [error, setError] = useState('');
@@ -10,7 +15,11 @@ const MatchedLoads = () => {
   const fetchMatchedLoads = async () => {
     try {
       const response = await axios.get(`${API_BASE}/matches`, { withCredentials: true });
-      setMatchedLoads(response.data.matches.filter(match => match.status === 'MATCHED' && match.load.status === 'MATCHED'));
+      setMatchedLoads(
+        response.data.matches.filter(
+          (match) => match.status === 'MATCHED' && match.load.status === 'MATCHED'
+        )
+      );
     } catch (err) {
       setError('Failed to fetch matched loads');
     }
@@ -22,7 +31,11 @@ const MatchedLoads = () => {
 
   const handleUpdateLoadStatus = async (loadId, status) => {
     try {
-      await axios.put(`${API_BASE}/loads/${loadId}/status`, { status }, { withCredentials: true });
+      await axios.put(
+        `${API_BASE}/loads/${loadId}/status`,
+        { status },
+        { withCredentials: true }
+      );
       fetchMatchedLoads();
     } catch (err) {
       console.error('Failed to update load status:', err);
@@ -31,33 +44,72 @@ const MatchedLoads = () => {
   };
 
   return (
-    <div className="container mt-5">
-      <h2>Matched Loads</h2>
-      {error && <div className="alert alert-danger">{error}</div>}
-      <ul className="list-group">
-        {matchedLoads.length > 0 ? (
-          matchedLoads.map(match => (
-            <li key={match.id} className="list-group-item">
-              <h5>Load: {match.load.origin.address}, {match.load.origin.city}, {match.load.origin.province} to {match.load.destination.address}, {match.load.destination.city}, {match.load.destination.province}</h5>
-              <p>Trucker: {match.trucker.name} ({match.trucker.email})</p>
-              <Link to={`/reviews/${match.trucker.id}`} className="btn btn-info btn-sm me-2">View Reviews</Link>
-              <p>Status: {match.status}</p>
-              {match.load.status === 'MATCHED' && !match.load.shipperInTransitConfirmed && (
-                <button className="btn btn-info btn-sm mt-2" onClick={() => handleUpdateLoadStatus(match.load.id, 'IN_TRANSIT')}>Mark as In Transit</button>
+    <AppShell
+      eyebrow="Shipper"
+      title="Matched loads."
+      standfirst="Booked and waiting to roll. Both sides confirm before a load moves to in transit."
+    >
+      {error && <div className="au-notice">{error}</div>}
+
+      {matchedLoads.length === 0 && !error && (
+        <div className="au-empty">
+          <h2 className="au-empty__title">Nothing booked right now.</h2>
+          <p className="au-empty__body">
+            Confirm a trucker from your pending matches and the load shows up here.
+          </p>
+          <Link to="/shipper/pending-matches" className="au-btn au-btn--primary">
+            Review pending matches <span aria-hidden="true">&rarr;</span>
+          </Link>
+        </div>
+      )}
+
+      <div style={{ paddingBottom: 48 }}>
+        {matchedLoads.map((match) => (
+          <Record
+            key={match.id}
+            route={formatRoute(match.load.origin, match.load.destination)}
+            endpoints={formatEndpoints(match.load.origin, match.load.destination)}
+            status={match.status}
+            meta={[
+              { label: 'Trucker', value: match.trucker.name },
+              { label: 'Contact', value: match.trucker.email },
+            ]}
+          >
+            {match.load.shipperInTransitConfirmed &&
+              !match.load.truckerInTransitConfirmed && (
+                <p className="au-notice au-notice--quiet" style={{ marginTop: 20, marginBottom: 0 }}>
+                  Waiting for the trucker to confirm in transit.
+                </p>
               )}
-              {match.load.status === 'MATCHED' && match.load.shipperInTransitConfirmed && !match.load.truckerInTransitConfirmed && (
-                <p className="text-info mt-2">Waiting for Trucker to confirm In Transit</p>
+
+            {match.load.shipperInTransitConfirmed &&
+              match.load.truckerInTransitConfirmed && (
+                <p className="au-notice au-notice--signal" style={{ marginTop: 20, marginBottom: 0 }}>
+                  Both sides confirmed. This load is in transit.
+                </p>
               )}
-              {match.load.status === 'MATCHED' && match.load.shipperInTransitConfirmed && match.load.truckerInTransitConfirmed && (
-                <p className="text-success mt-2">Both confirmed. Load is In Transit.</p>
+
+            <div className="au-actions">
+              {!match.load.shipperInTransitConfirmed && (
+                <button
+                  type="button"
+                  className="au-btn au-btn--primary au-btn--sm"
+                  onClick={() => handleUpdateLoadStatus(match.load.id, 'IN_TRANSIT')}
+                >
+                  Confirm in transit <span aria-hidden="true">&rarr;</span>
+                </button>
               )}
-            </li>
-          ))
-        ) : (
-          <li className="list-group-item">No matched loads yet.</li>
-        )}
-      </ul>
-    </div>
+              <Link
+                to={`/reviews/${match.trucker.id}`}
+                className="au-btn au-btn--secondary au-btn--sm"
+              >
+                View reviews
+              </Link>
+            </div>
+          </Record>
+        ))}
+      </div>
+    </AppShell>
   );
 };
 

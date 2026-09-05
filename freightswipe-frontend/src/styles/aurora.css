@@ -1,0 +1,1548 @@
+/* ============================================================
+   Aurora — base, primitives and the Bootstrap override layer.
+
+   Import order matters. App.js loads bootstrap.min.css first, then
+   tokens.css, then this file, so everything below wins on equal
+   specificity without needing !important.
+
+   Rules from DESIGN.md that this file enforces globally:
+     · no box-shadows, anywhere — depth is surface colour only
+     · Horizon Navy is the ink; #000 is for icons and logo marks
+     · 8px on containers and buttons, 4px on badges, 9999px only on
+       the Circular Arrow Button
+     · Signal Blue means "this is the action" and nothing else
+   ============================================================ */
+
+/* ---------------------------------------------------------------
+   1. Base
+   --------------------------------------------------------------- */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background-color: var(--surface-paper-white-canvas);
+  color: var(--color-horizon-navy);
+  font-family: var(--font-inter);
+  font-size: var(--text-body);
+  line-height: var(--leading-body);
+  font-weight: var(--font-weight-regular);
+  font-feature-settings: 'ss01' on, 'cv11' on;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Bootstrap sets its own font stack and a blue-purple link colour on :root
+   selectors that would otherwise survive. */
+body,
+.container,
+.container-fluid,
+.btn,
+.form-control,
+.form-select,
+.list-group-item,
+.card,
+.alert,
+input,
+button,
+select,
+textarea {
+  font-family: var(--font-inter);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: var(--color-horizon-navy);
+  font-weight: var(--font-weight-medium);
+  margin-top: 0;
+}
+
+p {
+  color: var(--color-horizon-navy);
+}
+
+a {
+  color: var(--color-horizon-navy);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--color-horizon-navy);
+  text-decoration: underline;
+}
+
+hr {
+  border: 0;
+  border-top: 1px solid var(--color-mist);
+  opacity: 1;
+  margin: var(--spacing-32) 0;
+}
+
+::selection {
+  background: var(--color-signal-blue);
+  color: var(--color-paper-white);
+}
+
+/* One focus treatment for the whole app: a Signal Blue ring, square-cornered
+   to match whatever it is sitting on. */
+:focus-visible {
+  outline: 2px solid var(--color-signal-blue);
+  outline-offset: 2px;
+}
+
+/* ---------------------------------------------------------------
+   2. Type scale
+   --------------------------------------------------------------- */
+
+.au-hero {
+  font-size: var(--text-hero);
+  line-height: var(--leading-hero);
+  letter-spacing: var(--tracking-hero);
+  font-weight: var(--font-weight-regular);
+  margin: 0;
+}
+
+.au-display {
+  font-size: var(--text-display);
+  line-height: var(--leading-display);
+  letter-spacing: var(--tracking-display);
+  font-weight: var(--font-weight-regular);
+  margin: 0;
+}
+
+.au-heading-lg {
+  font-size: var(--text-heading-lg);
+  line-height: var(--leading-heading-lg);
+  letter-spacing: var(--tracking-heading-lg);
+  font-weight: var(--font-weight-regular);
+  margin: 0;
+}
+
+.au-heading {
+  font-size: var(--text-heading);
+  line-height: var(--leading-heading);
+  letter-spacing: var(--tracking-heading);
+  font-weight: var(--font-weight-regular);
+  margin: 0;
+}
+
+.au-heading-sm {
+  font-size: var(--text-heading-sm);
+  line-height: var(--leading-heading-sm);
+  letter-spacing: var(--tracking-heading-sm);
+  font-weight: var(--font-weight-regular);
+  margin: 0;
+}
+
+.au-subheading-lg {
+  font-size: var(--text-subheading-lg);
+  line-height: var(--leading-subheading-lg);
+  letter-spacing: var(--tracking-subheading-lg);
+  font-weight: var(--font-weight-regular);
+  margin: 0;
+}
+
+.au-subheading {
+  font-size: var(--text-subheading);
+  line-height: var(--leading-subheading);
+  letter-spacing: var(--tracking-subheading);
+  font-weight: var(--font-weight-medium);
+  margin: 0;
+}
+
+.au-body {
+  font-size: var(--text-body);
+  line-height: var(--leading-body);
+  letter-spacing: normal;
+  margin: 0;
+}
+
+.au-body-sm {
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-body-sm);
+  letter-spacing: normal;
+  margin: 0;
+}
+
+.au-caption {
+  font-size: var(--text-caption);
+  line-height: var(--leading-caption);
+  letter-spacing: normal;
+  margin: 0;
+}
+
+.au-muted { color: var(--color-slate-whisper); }
+.au-dim   { color: var(--color-graphite-dim); }
+.au-ink   { color: var(--color-horizon-navy); }
+.au-invert { color: var(--color-paper-white); }
+.au-emphasis { font-weight: var(--font-weight-semibold); }
+
+/* Eyebrow — the quiet pre-header above a section title. Text only, no fill. */
+.au-eyebrow {
+  display: block;
+  font-size: var(--text-caption);
+  line-height: var(--leading-caption);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--color-slate-whisper);
+  margin: 0 0 var(--spacing-16);
+}
+
+.au-eyebrow--ink { color: var(--color-horizon-navy); }
+
+/* The one gradient moment. Reserved for the wordmark. */
+.au-spectrum {
+  background: var(--gradient-signal-blue);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* ---------------------------------------------------------------
+   3. Layout
+   --------------------------------------------------------------- */
+
+.au-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface-paper-white-canvas);
+}
+
+.au-main {
+  flex: 1 0 auto;
+  width: 100%;
+  /* Not margin on the footer: main grows to absorb the free space in the
+     100vh column, so a margin below it would push the footer off-screen on
+     short pages instead of separating it. */
+  padding-bottom: var(--spacing-48);
+}
+
+.au-container {
+  width: 100%;
+  max-width: var(--page-max-width);
+  margin: 0 auto;
+  padding-left: var(--spacing-24);
+  padding-right: var(--spacing-24);
+}
+
+.au-container--narrow { max-width: 720px; }
+
+/* A measure-limited column that stays against the container's left margin
+   rather than centring on the canvas -- headlines and forms both anchor left. */
+.au-column      { max-width: 480px; }
+.au-column--wide { max-width: 720px; }
+
+.au-section {
+  padding-top: var(--section-gap);
+  padding-bottom: var(--section-gap);
+}
+
+.au-section--tight {
+  padding-top: var(--spacing-48);
+  padding-bottom: var(--spacing-48);
+}
+
+.au-divider {
+  height: 1px;
+  background: var(--color-mist);
+  border: 0;
+  margin: 0;
+}
+
+/* Editorial two-column band: narrow left rail, wider right column of copy. */
+.au-editorial {
+  display: grid;
+  grid-template-columns: 40% minmax(0, 55%);
+  gap: var(--spacing-48);
+  align-items: start;
+}
+
+@media (max-width: 991px) {
+  .au-editorial { grid-template-columns: minmax(0, 1fr); gap: var(--spacing-32); }
+}
+
+.au-stack     { display: flex; flex-direction: column; gap: var(--spacing-24); }
+.au-stack--sm { gap: var(--spacing-12); }
+.au-stack--lg { gap: var(--spacing-44); }
+
+.au-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-8);
+}
+
+.au-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-12);
+  margin-top: var(--spacing-20);
+}
+
+/* ---------------------------------------------------------------
+   4. Buttons
+   --------------------------------------------------------------- */
+
+.au-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-8);
+  padding: 14px var(--spacing-16);
+  border-radius: var(--radius-buttons);
+  border: 1px solid transparent;
+  font-family: var(--font-inter);
+  font-size: var(--text-body-sm);
+  font-weight: var(--font-weight-medium);
+  line-height: 1;
+  letter-spacing: normal;
+  text-decoration: none;
+  cursor: pointer;
+  box-shadow: none;
+  transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease;
+}
+
+.au-btn:hover { text-decoration: none; }
+
+.au-btn:disabled,
+.au-btn[aria-disabled='true'] {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* Primary — the single Signal Blue action on a surface. */
+.au-btn--primary {
+  background: var(--color-signal-blue);
+  color: var(--color-paper-white);
+  border-color: var(--color-signal-blue);
+}
+
+.au-btn--primary:hover:not(:disabled) {
+  background: var(--color-signal-blue-pressed);
+  border-color: var(--color-signal-blue-pressed);
+  color: var(--color-paper-white);
+}
+
+/* Secondary — filled, one step up the surface ladder from the canvas. No
+   transparent-background buttons anywhere in the system: every control reads
+   as a solid object, and hierarchy comes from which surface it is filled with. */
+.au-btn--secondary {
+  background: var(--color-mist);
+  color: var(--color-horizon-navy);
+  border-color: var(--color-mist);
+}
+
+.au-btn--secondary:hover:not(:disabled) {
+  background: var(--color-fog);
+  border-color: var(--color-fog);
+  color: var(--color-horizon-navy);
+}
+
+/* Mist sits too close to Hailstone to read as a button on a raised card, so
+   on that surface the secondary steps up to Fog. */
+.au-card--raised .au-btn--secondary,
+.au-confirm .au-btn--secondary {
+  background: var(--color-fog);
+  border-color: var(--color-fog);
+}
+
+.au-card--raised .au-btn--secondary:hover:not(:disabled),
+.au-confirm .au-btn--secondary:hover:not(:disabled) {
+  background: var(--color-fog-pressed);
+  border-color: var(--color-fog-pressed);
+}
+
+/* Solid — an inverted Horizon Navy field. Used where a surface already spends
+   its one Signal Blue on something else but still needs a weighted action. */
+.au-btn--solid {
+  background: var(--color-horizon-navy);
+  color: var(--color-paper-white);
+  border-color: var(--color-horizon-navy);
+}
+
+.au-btn--solid:hover:not(:disabled) {
+  background: var(--color-horizon-navy-pressed);
+  color: var(--color-paper-white);
+}
+
+.au-btn--sm {
+  padding: 9px var(--spacing-12);
+  font-size: var(--text-caption);
+}
+
+.au-btn--block { width: 100%; }
+
+/* On the Horizon Navy field the secondary fills with the raised navy, keeping
+   it a solid object while leaving Signal Blue as the louder of the two. */
+.au-on-navy .au-btn--secondary {
+  background: var(--color-horizon-navy-raised);
+  color: var(--color-paper-white);
+  border-color: var(--color-horizon-navy-raised);
+}
+
+.au-on-navy .au-btn--secondary:hover:not(:disabled) {
+  background: var(--color-horizon-navy-raised-hover);
+  border-color: var(--color-horizon-navy-raised-hover);
+  color: var(--color-paper-white);
+}
+
+/* The system's only circle. */
+.au-arrow-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  flex: 0 0 48px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-iconbuttons);
+  background: var(--color-signal-blue);
+  color: var(--color-paper-white);
+  font-size: var(--text-body);
+  line-height: 1;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background-color 160ms ease;
+}
+
+.au-arrow-btn:hover {
+  background: var(--color-signal-blue-pressed);
+  color: var(--color-paper-white);
+  text-decoration: none;
+}
+
+/* Inline text link with the Signal Blue accent reserved for real navigation. */
+.au-link {
+  color: var(--color-horizon-navy);
+  font-weight: var(--font-weight-medium);
+  border-bottom: 1px solid var(--color-fog);
+  text-decoration: none;
+}
+
+.au-link:hover {
+  color: var(--color-horizon-navy);
+  border-bottom-color: var(--color-horizon-navy);
+  text-decoration: none;
+}
+
+.au-on-navy .au-link {
+  color: var(--color-paper-white);
+  border-bottom-color: rgba(255, 255, 255, 0.4);
+}
+
+.au-on-navy .au-link:hover {
+  color: var(--color-paper-white);
+  border-bottom-color: var(--color-paper-white);
+}
+
+/* ---------------------------------------------------------------
+   5. Surfaces — cards, panels, wells
+   --------------------------------------------------------------- */
+
+.au-card {
+  background: var(--surface-paper-white-canvas);
+  border: 1px solid var(--color-mist);
+  border-radius: var(--radius-cards);
+  padding: var(--card-padding);
+  box-shadow: none;
+}
+
+/* One step off the canvas. */
+.au-card--raised {
+  background: var(--surface-hailstone-card);
+  border-color: transparent;
+}
+
+/* The inverted field. */
+.au-card--navy {
+  background: var(--surface-horizon-navy-field);
+  border-color: transparent;
+  color: var(--color-paper-white);
+}
+
+.au-card--navy h1, .au-card--navy h2, .au-card--navy h3,
+.au-card--navy h4, .au-card--navy h5, .au-card--navy p {
+  color: var(--color-paper-white);
+}
+
+.au-card--flush { padding: 0; overflow: hidden; }
+
+/* A row in a list of records. Reads as an editorial entry, not a table row. */
+.au-record {
+  display: block;
+  background: var(--surface-paper-white-canvas);
+  border: 1px solid var(--color-mist);
+  border-radius: var(--radius-cards);
+  padding: var(--card-padding);
+  margin: 0;
+}
+
+.au-record + .au-record { margin-top: var(--spacing-12); }
+
+.au-record__route {
+  font-size: var(--text-subheading);
+  line-height: var(--leading-subheading);
+  letter-spacing: var(--tracking-subheading);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-horizon-navy);
+  margin: 0 0 var(--spacing-4);
+}
+
+.au-record__endpoints {
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-body-sm);
+  color: var(--color-slate-whisper);
+  margin: 0 0 var(--spacing-20);
+}
+
+/* Metadata strip: label above figure, hairline-separated. Mirrors the hero
+   stats bar so the dashboards feel like the same product as the landing page. */
+.au-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0;
+  border-top: 1px solid var(--color-mist);
+  padding-top: var(--spacing-16);
+  margin: 0;
+}
+
+.au-meta__item {
+  flex: 1 1 120px;
+  min-width: 0;
+  padding: 0 var(--spacing-16);
+  border-left: 1px solid var(--color-mist);
+}
+
+.au-meta__item:first-child { padding-left: 0; border-left: 0; }
+
+/* The strip wraps to two-up on a phone, where only clearing :first-child
+   leaves an orphan rule at the head of the second row. */
+@media (max-width: 575px) {
+  .au-meta__item {
+    flex: 1 1 50%;
+    padding: var(--spacing-8) var(--spacing-16);
+  }
+  .au-meta__item:nth-child(odd) { padding-left: 0; border-left: 0; }
+}
+
+.au-meta__label {
+  display: block;
+  font-size: var(--text-caption);
+  line-height: var(--leading-caption);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: var(--tracking-stat-label);
+  text-transform: uppercase;
+  color: var(--color-slate-whisper);
+  margin-bottom: var(--spacing-4);
+}
+
+.au-meta__value {
+  display: block;
+  font-size: var(--text-body);
+  line-height: var(--leading-body-sm);
+  color: var(--color-horizon-navy);
+  overflow-wrap: break-word;
+}
+
+/* Empty states — Hailstone, never a bare paragraph on the canvas. */
+.au-empty {
+  background: var(--surface-hailstone-card);
+  border-radius: var(--radius-cards);
+  padding: var(--spacing-48) var(--card-padding);
+  text-align: left;
+}
+
+.au-empty__title {
+  font-size: var(--text-subheading);
+  letter-spacing: var(--tracking-subheading);
+  font-weight: var(--font-weight-medium);
+  margin: 0 0 var(--spacing-8);
+}
+
+.au-empty__body {
+  color: var(--color-slate-whisper);
+  margin: 0 0 var(--spacing-24);
+  max-width: 46ch;
+}
+
+/* ---------------------------------------------------------------
+   6. Status labels
+   Text-only eyebrows, 4px radius on the rare filled one. No colour
+   coding — the palette has no green or red to code with, so status
+   reads through weight and a leading rule instead.
+   --------------------------------------------------------------- */
+
+.au-status {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-8);
+  font-size: var(--text-caption);
+  line-height: var(--leading-caption);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--color-slate-whisper);
+  border-radius: var(--radius-badges);
+}
+
+.au-status::before {
+  content: '';
+  width: 8px;
+  height: 2px;
+  background: currentColor;
+  flex: 0 0 8px;
+}
+
+/* Live / actionable states step up to the ink; the terminal one recedes. */
+.au-status--active   { color: var(--color-horizon-navy); }
+.au-status--signal   { color: var(--color-signal-blue); }
+.au-status--resting  { color: var(--color-slate-whisper); }
+
+/* ---------------------------------------------------------------
+   7. Notices
+   --------------------------------------------------------------- */
+
+.au-notice {
+  border-left: 2px solid var(--color-horizon-navy);
+  background: var(--surface-hailstone-card);
+  border-radius: 0 var(--radius-badges) var(--radius-badges) 0;
+  padding: var(--spacing-12) var(--spacing-16);
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-body-sm);
+  color: var(--color-horizon-navy);
+  margin: 0 0 var(--spacing-20);
+}
+
+.au-notice--signal { border-left-color: var(--color-signal-blue); }
+.au-notice--quiet  { border-left-color: var(--color-fog); color: var(--color-slate-whisper); }
+
+/* ---------------------------------------------------------------
+   8. Forms
+   --------------------------------------------------------------- */
+
+.au-field { margin-bottom: var(--spacing-20); }
+
+.au-label {
+  display: block;
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-body-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-horizon-navy);
+  margin-bottom: var(--spacing-8);
+}
+
+.au-help {
+  display: block;
+  font-size: var(--text-caption);
+  line-height: var(--leading-caption);
+  color: var(--color-slate-whisper);
+  margin-top: var(--spacing-8);
+}
+
+.au-input,
+.au-select,
+.au-textarea {
+  display: block;
+  width: 100%;
+  background: var(--surface-hailstone-card);
+  border: 1px solid var(--color-mist);
+  border-radius: var(--radius-lg);
+  padding: 12px var(--spacing-16);
+  font-family: var(--font-inter);
+  font-size: var(--text-body);
+  line-height: var(--leading-body-sm);
+  letter-spacing: normal;
+  color: var(--color-horizon-navy);
+  box-shadow: none;
+  transition: border-color 160ms ease, background-color 160ms ease;
+}
+
+.au-textarea { min-height: 96px; resize: vertical; }
+
+.au-input::placeholder,
+.au-textarea::placeholder { color: var(--color-slate-whisper); }
+
+.au-input:focus,
+.au-select:focus,
+.au-textarea:focus {
+  background: var(--surface-paper-white-canvas);
+  border-color: var(--color-signal-blue);
+  outline: none;
+  box-shadow: none;
+}
+
+.au-fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0 0 var(--spacing-32);
+}
+
+.au-fieldset__legend {
+  display: block;
+  font-size: var(--text-caption);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--color-slate-whisper);
+  padding: 0 0 var(--spacing-12);
+  margin: 0 0 var(--spacing-20);
+  border-bottom: 1px solid var(--color-mist);
+  width: 100%;
+}
+
+.au-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 var(--spacing-16);
+}
+
+@media (max-width: 575px) {
+  .au-grid-2 { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* ---------------------------------------------------------------
+   9. Top navigation
+   --------------------------------------------------------------- */
+
+.au-nav {
+  position: sticky;
+  top: 0;
+  z-index: 900;
+  background: var(--surface-paper-white-canvas);
+  border-bottom: 1px solid var(--color-mist);
+  box-shadow: none;
+}
+
+/* Over the hero the bar goes transparent and its type flips to Paper White. */
+.au-nav--over-hero {
+  position: fixed;
+  left: 0;
+  right: 0;
+  background: transparent;
+  border-bottom-color: transparent;
+  transition: background-color 200ms ease, border-color 200ms ease;
+}
+
+/* Past the hero the bar lands back on the canvas and its type returns to ink.
+   Without this the Paper White nav links sit invisible on Paper White. */
+.au-nav--over-hero.au-nav--landed {
+  background: var(--surface-paper-white-canvas);
+  border-bottom-color: var(--color-mist);
+}
+
+.au-nav__inner {
+  max-width: var(--page-max-width);
+  margin: 0 auto;
+  min-height: var(--nav-height);
+  padding: var(--spacing-12) var(--spacing-24);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-28);
+}
+
+.au-nav__logo {
+  font-size: var(--text-subheading);
+  line-height: 1;
+  letter-spacing: var(--tracking-subheading);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-horizon-navy);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.au-nav__logo:hover { text-decoration: none; }
+
+.au-nav__links {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-28);
+  margin: 0 0 0 var(--spacing-16);
+  padding: 0;
+  list-style: none;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.au-nav__links::-webkit-scrollbar { display: none; }
+
+.au-nav__link {
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-body-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-horizon-navy);
+  text-decoration: none;
+  white-space: nowrap;
+  padding: var(--spacing-4) 0;
+  border-bottom: 1px solid transparent;
+}
+
+.au-nav__link:hover {
+  color: var(--color-horizon-navy);
+  border-bottom-color: var(--color-fog);
+  text-decoration: none;
+}
+
+.au-nav__link--active {
+  color: var(--color-signal-blue);
+  border-bottom-color: var(--color-signal-blue);
+}
+
+.au-nav__link--active:hover {
+  color: var(--color-signal-blue);
+  border-bottom-color: var(--color-signal-blue);
+}
+
+.au-nav__spacer { margin-left: auto; }
+
+.au-nav--over-hero .au-nav__logo,
+.au-nav--over-hero .au-nav__link {
+  color: var(--color-paper-white);
+}
+
+.au-nav--over-hero .au-nav__link:hover {
+  border-bottom-color: rgba(255, 255, 255, 0.5);
+}
+
+.au-nav--over-hero.au-nav--landed .au-nav__logo,
+.au-nav--over-hero.au-nav--landed .au-nav__link {
+  color: var(--color-horizon-navy);
+}
+
+.au-nav--over-hero.au-nav--landed .au-nav__link:hover {
+  border-bottom-color: var(--color-fog);
+}
+
+@media (max-width: 767px) {
+  .au-nav__inner { flex-wrap: wrap; gap: var(--spacing-12); }
+  .au-nav__links { order: 3; width: 100%; margin-left: 0; gap: var(--spacing-20); }
+  .au-nav__spacer { margin-left: auto; }
+}
+
+/* On a phone the marketing bar (logo + "Log in" + CTA) wrapped onto a second
+   line and pushed into the hero. The hero already carries both calls to
+   action, so the bar keeps only the log-in link. */
+@media (max-width: 575px) {
+  .au-nav__inner { flex-wrap: nowrap; }
+  .au-nav__inner > .au-btn { display: none; }
+}
+
+/* ---------------------------------------------------------------
+   10. Footer
+   --------------------------------------------------------------- */
+
+.au-footer {
+  flex: 0 0 auto;
+  border-top: 1px solid var(--color-mist);
+  background: var(--surface-paper-white-canvas);
+}
+
+.au-footer__inner {
+  max-width: var(--page-max-width);
+  margin: 0 auto;
+  padding: var(--spacing-48) var(--spacing-24);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-48);
+  align-items: flex-start;
+}
+
+.au-footer__col { flex: 1 1 160px; min-width: 0; }
+
+.au-footer__heading {
+  font-size: var(--text-caption);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--color-slate-whisper);
+  margin: 0 0 var(--spacing-16);
+}
+
+.au-footer__list { list-style: none; margin: 0; padding: 0; }
+.au-footer__list li + li { margin-top: var(--spacing-8); }
+
+.au-footer__link {
+  font-size: var(--text-body-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-horizon-navy);
+  text-decoration: none;
+}
+
+.au-footer__link:hover { text-decoration: underline; color: var(--color-horizon-navy); }
+
+.au-footer__brand {
+  flex: 1 1 200px;
+  text-align: right;
+  margin-left: auto;
+}
+
+.au-footer__legal {
+  font-size: var(--text-body-sm);
+  font-weight: var(--font-weight-regular);
+  color: var(--color-slate-whisper);
+  margin: var(--spacing-8) 0 0;
+}
+
+@media (max-width: 767px) {
+  .au-footer__inner { gap: var(--spacing-32); }
+  .au-footer__brand { text-align: left; margin-left: 0; }
+}
+
+/* ---------------------------------------------------------------
+   11. Hero
+   --------------------------------------------------------------- */
+
+.au-hero-section {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  overflow: hidden;
+  background-color: var(--surface-horizon-navy-field);
+}
+
+/* The dashcam plate. Drop a real windshield still or loop at
+   public/hero-highway.jpg (or .mp4 into the <video>) and it takes over;
+   until then the Horizon Navy field below stands in, which is the
+   documented full-bleed dark fallback rather than a decorative gradient. */
+.au-hero-section__media {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background-color: var(--surface-horizon-navy-field);
+}
+
+.au-hero-section__scrim {
+  position: absolute;
+  inset: 0;
+  background: var(--overlay-horizon-navy);
+}
+
+/* A single lane marking receding to the vanishing point — drawn, not
+   decorative: it is the one structural cue that keeps the empty navy
+   field reading as a road rather than a colour block. */
+.au-hero-section__lane {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.2;
+  /* Faded out across the left half so the perspective lines never cross the
+     headline -- the road reads behind the experience card, not through the
+     type. */
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, transparent 34%, #000 78%);
+  mask-image: linear-gradient(to right, transparent 0%, transparent 34%, #000 78%);
+}
+
+.au-hero-section__content {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: var(--page-max-width);
+  margin: 0 auto;
+  padding: var(--spacing-120) var(--spacing-24) var(--spacing-32);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--spacing-48);
+  align-items: end;
+}
+
+.au-hero-section__headline {
+  color: var(--color-paper-white);
+  max-width: 15ch;
+}
+
+.au-hero-section__standfirst {
+  color: rgba(255, 255, 255, 0.78);
+  font-size: var(--text-subheading);
+  line-height: var(--leading-body-sm);
+  letter-spacing: var(--tracking-subheading);
+  max-width: 44ch;
+  margin: var(--spacing-24) 0 var(--spacing-32);
+}
+
+@media (max-width: 991px) {
+  .au-hero-section__content { grid-template-columns: minmax(0, 1fr); }
+  .au-hero-section__headline { max-width: 100%; }
+}
+
+/* Stats bar along the hero's bottom edge. */
+.au-stats {
+  position: relative;
+  z-index: 2;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(2px);
+}
+
+.au-stats__inner {
+  max-width: var(--page-max-width);
+  margin: 0 auto;
+  padding: var(--spacing-20) var(--spacing-24);
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.au-stats__item {
+  flex: 1 1 25%;
+  min-width: 140px;
+  padding: 0 var(--spacing-24);
+  border-left: 1px solid var(--color-mist);
+}
+
+.au-stats__item:first-child { padding-left: 0; border-left: 0; }
+
+.au-stats__label {
+  display: block;
+  font-size: var(--text-caption);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: var(--tracking-stat-label);
+  text-transform: uppercase;
+  color: var(--color-horizon-navy);
+  margin-bottom: var(--spacing-4);
+}
+
+.au-stats__value {
+  display: block;
+  font-size: var(--text-body);
+  font-weight: var(--font-weight-regular);
+  color: var(--color-horizon-navy);
+}
+
+@media (max-width: 767px) {
+  .au-stats__item {
+    flex: 1 1 50%;
+    padding: var(--spacing-12) var(--spacing-16);
+    border-left: 1px solid var(--color-mist);
+  }
+  .au-stats__item:nth-child(odd) { padding-left: 0; border-left: 0; }
+}
+
+/* Experience card floating in the hero's lower right. */
+.au-experience {
+  width: 360px;
+  max-width: 100%;
+  background: var(--surface-paper-white-canvas);
+  border-radius: var(--radius-cards);
+  overflow: hidden;
+  box-shadow: none;
+}
+
+.au-experience__figure {
+  height: 148px;
+  background: var(--surface-horizon-navy-field);
+  display: block;
+  width: 100%;
+  object-fit: cover;
+}
+
+.au-experience__body {
+  padding: var(--spacing-16);
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--spacing-16);
+}
+
+.au-experience__label {
+  display: block;
+  font-size: var(--text-caption);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--color-slate-whisper);
+  margin-bottom: var(--spacing-8);
+}
+
+.au-experience__title {
+  font-size: var(--text-body);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-horizon-navy);
+  text-decoration: none;
+  margin: 0;
+}
+
+/* ---------------------------------------------------------------
+   12. Text reveal — the signature motion
+   --------------------------------------------------------------- */
+
+.au-reveal {
+  font-size: var(--text-heading-sm);
+  line-height: 1.4;
+  letter-spacing: var(--tracking-heading-sm);
+  font-weight: var(--font-weight-regular);
+  color: var(--color-fog);
+  margin: 0;
+  text-align: left;
+  max-width: 540px;
+}
+
+.au-reveal + .au-reveal { margin-top: var(--spacing-48); }
+
+.au-reveal__word {
+  color: var(--color-fog);
+  transition: color 520ms ease;
+}
+
+.au-reveal.is-revealed .au-reveal__word {
+  color: var(--color-horizon-navy);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .au-reveal,
+  .au-reveal__word {
+    color: var(--color-horizon-navy);
+    transition: none;
+  }
+}
+
+/* ---------------------------------------------------------------
+   13. Modal
+   --------------------------------------------------------------- */
+
+.au-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--overlay-horizon-navy);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-24);
+  z-index: 1000;
+}
+
+.au-modal-content {
+  background: var(--surface-paper-white-canvas);
+  border-radius: var(--radius-cards);
+  border: 1px solid var(--color-mist);
+  box-shadow: none;
+  padding: var(--card-padding);
+  width: min(640px, 100%);
+  max-height: 85vh;
+  overflow-y: auto;
+  z-index: 1001;
+}
+
+/* ===============================================================
+   14. Bootstrap override layer
+
+   Bootstrap stays installed and its grid/spacing utilities are used
+   throughout. Everything it paints, though, is re-skinned here so a
+   stray .btn or .card left in a page still lands inside the system.
+   =============================================================== */
+
+/* --- Shadows do not exist. Neutralise every Bootstrap shadow path. --- */
+.shadow, .shadow-sm, .shadow-lg,
+.btn, .card, .form-control, .form-select, .list-group-item,
+.alert, .modal-content, .dropdown-menu {
+  box-shadow: none !important;
+}
+
+/* --- Bootstrap's theme variables, remapped to Aurora. --- */
+.btn-primary {
+  --bs-btn-bg: var(--color-signal-blue);
+  --bs-btn-border-color: var(--color-signal-blue);
+  --bs-btn-hover-bg: var(--color-signal-blue-pressed);
+  --bs-btn-hover-border-color: var(--color-signal-blue-pressed);
+  --bs-btn-active-bg: var(--color-signal-blue-pressed);
+  --bs-btn-active-border-color: var(--color-signal-blue-pressed);
+  --bs-btn-color: var(--color-paper-white);
+  --bs-btn-hover-color: var(--color-paper-white);
+  --bs-btn-active-color: var(--color-paper-white);
+  --bs-btn-disabled-bg: var(--color-signal-blue);
+  --bs-btn-disabled-border-color: var(--color-signal-blue);
+}
+
+/* Aurora has no green, red, amber or teal. Every non-primary Bootstrap
+   button collapses to one of two in-system treatments: a bordered ghost,
+   or the inverted Horizon Navy field for weighted confirmations. */
+.btn-secondary,
+.btn-outline-primary,
+.btn-outline-secondary,
+.btn-info,
+.btn-light,
+.btn-warning {
+  --bs-btn-bg: var(--color-mist);
+  --bs-btn-border-color: var(--color-mist);
+  --bs-btn-color: var(--color-horizon-navy);
+  --bs-btn-hover-bg: var(--color-fog);
+  --bs-btn-hover-border-color: var(--color-fog);
+  --bs-btn-hover-color: var(--color-horizon-navy);
+  --bs-btn-active-bg: var(--color-fog);
+  --bs-btn-active-border-color: var(--color-fog);
+  --bs-btn-active-color: var(--color-horizon-navy);
+}
+
+.btn-success,
+.btn-dark,
+.btn-danger {
+  --bs-btn-bg: var(--color-horizon-navy);
+  --bs-btn-border-color: var(--color-horizon-navy);
+  --bs-btn-color: var(--color-paper-white);
+  --bs-btn-hover-bg: var(--color-horizon-navy-pressed);
+  --bs-btn-hover-border-color: var(--color-horizon-navy-pressed);
+  --bs-btn-hover-color: var(--color-paper-white);
+  --bs-btn-active-bg: var(--color-horizon-navy-pressed);
+  --bs-btn-active-border-color: var(--color-horizon-navy-pressed);
+  --bs-btn-active-color: var(--color-paper-white);
+}
+
+.btn {
+  --bs-btn-border-radius: var(--radius-buttons);
+  --bs-btn-font-family: var(--font-inter);
+  --bs-btn-font-size: var(--text-body-sm);
+  --bs-btn-font-weight: var(--font-weight-medium);
+  --bs-btn-padding-y: 14px;
+  --bs-btn-padding-x: var(--spacing-16);
+  --bs-btn-focus-shadow-rgb: 0, 106, 237;
+  letter-spacing: normal;
+  line-height: 1;
+}
+
+.btn-sm {
+  --bs-btn-border-radius: var(--radius-buttons);
+  --bs-btn-font-size: var(--text-caption);
+  --bs-btn-padding-y: 9px;
+  --bs-btn-padding-x: var(--spacing-12);
+}
+
+.btn-lg {
+  --bs-btn-border-radius: var(--radius-buttons);
+  --bs-btn-font-size: var(--text-body);
+  --bs-btn-padding-y: 16px;
+  --bs-btn-padding-x: var(--spacing-24);
+}
+
+/* --- Cards --- */
+.card {
+  --bs-card-bg: var(--surface-paper-white-canvas);
+  --bs-card-border-color: var(--color-mist);
+  --bs-card-border-radius: var(--radius-cards);
+  --bs-card-inner-border-radius: var(--radius-cards);
+  --bs-card-spacer-x: var(--card-padding);
+  --bs-card-spacer-y: var(--card-padding);
+  --bs-card-cap-bg: var(--surface-hailstone-card);
+}
+
+.card.border-0 { border: 1px solid var(--color-mist) !important; }
+
+.card-title {
+  font-size: var(--text-subheading);
+  line-height: var(--leading-subheading);
+  letter-spacing: var(--tracking-subheading);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-horizon-navy);
+  margin-bottom: var(--spacing-16);
+}
+
+/* --- List groups --- */
+.list-group {
+  --bs-list-group-border-color: var(--color-mist);
+  --bs-list-group-border-radius: var(--radius-cards);
+  --bs-list-group-bg: var(--surface-paper-white-canvas);
+  --bs-list-group-color: var(--color-horizon-navy);
+  --bs-list-group-item-padding-x: var(--card-padding);
+  --bs-list-group-item-padding-y: var(--spacing-20);
+  --bs-list-group-action-hover-bg: var(--color-hailstone);
+  --bs-list-group-action-hover-color: var(--color-horizon-navy);
+  --bs-list-group-action-active-bg: var(--color-hailstone);
+  --bs-list-group-action-active-color: var(--color-horizon-navy);
+  --bs-list-group-active-bg: var(--color-signal-blue);
+  --bs-list-group-active-border-color: var(--color-signal-blue);
+}
+
+.list-group-item h5,
+.list-group-item h6 {
+  font-size: var(--text-subheading);
+  line-height: var(--leading-subheading);
+  letter-spacing: var(--tracking-subheading);
+  font-weight: var(--font-weight-medium);
+}
+
+.list-group-item p { color: var(--color-slate-whisper); margin-bottom: var(--spacing-4); }
+
+/* A list-group used purely as navigation gets the trailing arrow. */
+.list-group-item-action {
+  font-size: var(--text-body);
+  font-weight: var(--font-weight-medium);
+  text-decoration: none;
+}
+
+/* --- Forms --- */
+.form-control,
+.form-select {
+  background-color: var(--surface-hailstone-card);
+  border: 1px solid var(--color-mist);
+  border-radius: var(--radius-lg);
+  padding: 12px var(--spacing-16);
+  font-family: var(--font-inter);
+  font-size: var(--text-body);
+  line-height: var(--leading-body-sm);
+  color: var(--color-horizon-navy);
+}
+
+.form-control:focus,
+.form-select:focus {
+  background-color: var(--surface-paper-white-canvas);
+  border-color: var(--color-signal-blue);
+  box-shadow: none;
+  color: var(--color-horizon-navy);
+}
+
+.form-control::placeholder { color: var(--color-slate-whisper); }
+
+.form-label {
+  font-size: var(--text-body-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-horizon-navy);
+  margin-bottom: var(--spacing-8);
+}
+
+.form-text {
+  font-size: var(--text-caption);
+  color: var(--color-slate-whisper);
+}
+
+/* --- Alerts --- */
+.alert {
+  border: 0;
+  border-left: 2px solid var(--color-horizon-navy);
+  border-radius: 0 var(--radius-badges) var(--radius-badges) 0;
+  background: var(--surface-hailstone-card);
+  color: var(--color-horizon-navy);
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-body-sm);
+  padding: var(--spacing-12) var(--spacing-16);
+}
+
+.alert-danger  { border-left-color: var(--color-horizon-navy); color: var(--color-horizon-navy); }
+.alert-primary,
+.alert-success { border-left-color: var(--color-signal-blue); color: var(--color-horizon-navy); }
+.alert-info,
+.alert-warning,
+.alert-secondary { border-left-color: var(--color-fog); color: var(--color-graphite-dim); }
+
+/* --- Badges --- */
+.badge {
+  border-radius: var(--radius-badges);
+  font-size: var(--text-caption);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+}
+
+/* --- Text utilities Bootstrap paints with its own palette --- */
+.text-muted     { color: var(--color-slate-whisper) !important; }
+.text-secondary { color: var(--color-slate-whisper) !important; }
+.text-info,
+.text-primary   { color: var(--color-signal-blue) !important; }
+.text-success,
+.text-dark,
+.text-body      { color: var(--color-horizon-navy) !important; }
+.text-danger,
+.text-warning   { color: var(--color-horizon-navy) !important; }
+
+.bg-light   { background-color: var(--surface-hailstone-card) !important; }
+.bg-primary { background-color: var(--color-signal-blue) !important; }
+.bg-dark    { background-color: var(--surface-horizon-navy-field) !important; }
+
+/* --- Display / lead classes --- */
+.display-1, .display-2, .display-3, .display-4, .display-5, .display-6 {
+  font-weight: var(--font-weight-regular);
+  letter-spacing: var(--tracking-display);
+  line-height: var(--leading-display);
+}
+
+.lead {
+  font-size: var(--text-subheading);
+  line-height: var(--leading-body-sm);
+  letter-spacing: var(--tracking-subheading);
+  font-weight: var(--font-weight-regular);
+  color: var(--color-slate-whisper);
+}
+
+/* Bootstrap's .fw-bold is 700; the system tops out at 600. */
+.fw-bold, .fw-bolder { font-weight: var(--font-weight-semibold) !important; }
+
+/* Bootstrap's own modal, if it is ever used. */
+.modal-content {
+  border: 1px solid var(--color-mist);
+  border-radius: var(--radius-cards);
+}
+
+.modal-backdrop.show { background-color: var(--color-horizon-navy); opacity: 0.62; }
+
+/* ---------------------------------------------------------------
+   15. Page header — the band at the top of an interior page
+   --------------------------------------------------------------- */
+
+.au-page-head {
+  padding-top: var(--spacing-72);
+  padding-bottom: var(--spacing-32);
+  border-bottom: 1px solid var(--color-mist);
+  margin-bottom: var(--spacing-48);
+}
+
+.au-page-head__title {
+  font-size: var(--text-heading);
+  line-height: var(--leading-heading);
+  letter-spacing: var(--tracking-heading);
+  font-weight: var(--font-weight-regular);
+  color: var(--color-horizon-navy);
+  margin: 0;
+  max-width: 20ch;
+}
+
+.au-page-head__standfirst {
+  font-size: var(--text-body);
+  line-height: var(--leading-body);
+  color: var(--color-slate-whisper);
+  margin: var(--spacing-16) 0 0;
+  max-width: 56ch;
+}
+
+.au-page-head__aside {
+  margin-top: var(--spacing-24);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-12);
+}
+
+@media (max-width: 575px) {
+  .au-page-head { padding-top: var(--spacing-48); }
+}
+
+/* ---------------------------------------------------------------
+   16. Section index — the linked list of queues on a dashboard
+   --------------------------------------------------------------- */
+
+.au-index {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--color-mist);
+}
+
+.au-index__link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-16);
+  padding: var(--spacing-16) 0;
+  border-bottom: 1px solid var(--color-mist);
+  font-size: var(--text-body);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-horizon-navy);
+  text-decoration: none;
+  transition: color 160ms ease;
+}
+
+.au-index__link:hover {
+  color: var(--color-signal-blue);
+  text-decoration: none;
+}
+
+.au-index__arrow {
+  color: var(--color-fog);
+  transition: color 160ms ease, transform 160ms ease;
+}
+
+.au-index__link:hover .au-index__arrow {
+  color: var(--color-signal-blue);
+  transform: translateX(4px);
+}
+
+/* Deck page: the swipe stack sits in the right column of the editorial grid. */
+.au-deck-frame {
+  display: flex;
+  justify-content: center;
+  padding-bottom: var(--spacing-48);
+}
+
+/* ---------------------------------------------------------------
+   17. Google Places autocomplete element
+
+   The widget renders into a shadow root, so only the host is
+   reachable. Sizing and the outer frame are set here; the internals
+   keep Google's own type, which is the one place in the app where
+   another typeface appears.
+   --------------------------------------------------------------- */
+
+gmp-place-autocomplete,
+gmp-placeautocomplete {
+  display: block;
+  width: 100%;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  --gmp-mat-color-surface: var(--surface-hailstone-card);
+  --gmp-mat-color-on-surface: var(--color-horizon-navy);
+  --gmp-mat-color-on-surface-variant: var(--color-slate-whisper);
+  --gmp-mat-color-outline-variant: var(--color-mist);
+  --gmp-mat-color-primary: var(--color-signal-blue);
+}
+
+/* The Places dropdown is portalled to <body>, outside any Aurora container. */
+.pac-container {
+  border: 1px solid var(--color-mist);
+  border-radius: var(--radius-lg);
+  box-shadow: none;
+  font-family: var(--font-inter);
+  margin-top: var(--spacing-4);
+}
+
+.pac-item {
+  padding: var(--spacing-8) var(--spacing-12);
+  font-size: var(--text-body-sm);
+  color: var(--color-slate-whisper);
+  border-top: 1px solid var(--color-mist);
+}
+
+.pac-item:first-child { border-top: 0; }
+.pac-item:hover { background: var(--color-hailstone); }
+.pac-item-query { color: var(--color-horizon-navy); font-size: var(--text-body-sm); }
+
+/* The lane marking inherits its stroke, so the colour stays in the token layer
+   rather than sitting in the SVG's presentation attributes. */
+.au-hero-section__lane { color: var(--color-paper-white); }
+
+/* ---------------------------------------------------------------
+   18. Confirm step
+
+   Aurora has no red, so a destructive action cannot be signalled by
+   colour. It is signalled by friction instead: the trigger swaps in
+   place for a prompt that states the consequence, and the button
+   that carries it out is labelled with the verb rather than "OK".
+   This replaces window.confirm, which sat outside the system.
+   --------------------------------------------------------------- */
+
+.au-confirm {
+  border-left: 2px solid var(--color-horizon-navy);
+  background: var(--surface-hailstone-card);
+  border-radius: 0 var(--radius-badges) var(--radius-badges) 0;
+  padding: var(--spacing-16);
+  margin-top: var(--spacing-20);
+}
+
+.au-confirm__prompt {
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-body-sm);
+  color: var(--color-horizon-navy);
+  margin: 0 0 var(--spacing-16);
+  max-width: 52ch;
+}
+
+.au-confirm__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-12);
+}

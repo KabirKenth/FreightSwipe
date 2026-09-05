@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { API_BASE } from '../../api';
+import AppShell from '../../components/AppShell';
+import Record, { formatRoute, formatEndpoints, formatMoney } from '../../components/Record';
 
 const CompletedLoads = () => {
   const [completedLoads, setCompletedLoads] = useState([]);
@@ -15,9 +17,17 @@ const CompletedLoads = () => {
   const fetchCompletedLoads = async () => {
     try {
       const response = await axios.get(`${API_BASE}/matches`, { withCredentials: true });
-      const { matches, userId } = response.data;
-      setCompletedLoads(matches.filter(match => match.status === 'MATCHED' && match.load && match.load.status === 'COMPLETED' && match.truckerId === userId));
-      setUserId(userId);
+      const { matches, userId: id } = response.data;
+      setCompletedLoads(
+        matches.filter(
+          (match) =>
+            match.status === 'MATCHED' &&
+            match.load &&
+            match.load.status === 'COMPLETED' &&
+            match.truckerId === id
+        )
+      );
+      setUserId(id);
     } catch (err) {
       setError('Failed to fetch completed loads');
     }
@@ -39,7 +49,11 @@ const CompletedLoads = () => {
     }
 
     try {
-      await axios.post(`${API_BASE}/reviews`, { loadId: reviewLoadId, rating: parseInt(reviewRating), comment: reviewComment }, { withCredentials: true });
+      await axios.post(
+        `${API_BASE}/reviews`,
+        { loadId: reviewLoadId, rating: parseInt(reviewRating, 10), comment: reviewComment },
+        { withCredentials: true }
+      );
       setShowReviewForm(false);
       setReviewLoadId(null);
       setReviewRating(5);
@@ -53,48 +67,85 @@ const CompletedLoads = () => {
   };
 
   return (
-    <div className="container mt-5">
-      <h2>Completed Loads</h2>
-      {error && <div className="alert alert-danger">{error}</div>}
-      <ul className="list-group">
-        {completedLoads.length > 0 ? (
-          completedLoads.map(match => {
-            const hasReviewed = match.load && match.load.reviews && Array.isArray(match.load.reviews) && match.load.reviews.some(review => review.reviewerId === userId);
-            return (
-              <li key={match.id} className="list-group-item">
-                <h5>Load: {match.load.origin.address}, {match.load.origin.city}, {match.load.origin.province} to {match.load.destination.address}, {match.load.destination.city}, {match.load.destination.province}</h5>
-                <p>Shipper: {match.shipper.name} ({match.shipper.email})</p>
-                <Link to={`/reviews/${match.shipper.id}`} className="btn btn-info btn-sm me-2">View All Reviews for this Shipper</Link>
-                <p>Status: {match.load.status}</p>
-                {match.load.status === 'COMPLETED' && !hasReviewed && (
-                  <button className="btn btn-primary btn-sm mt-2" onClick={() => handleReview(match.load.id)}>Leave Review</button>
+    <AppShell
+      eyebrow="Trucker"
+      title="Delivered."
+      standfirst="Loads you have run. Leave the shipper a review while it is fresh."
+    >
+      {error && <div className="au-notice">{error}</div>}
+
+      {completedLoads.length === 0 && !error && (
+        <div className="au-empty">
+          <h2 className="au-empty__title">No completed loads yet.</h2>
+          <p className="au-empty__body">
+            Once a load you carried is marked delivered, it moves here and both sides can
+            review each other.
+          </p>
+          <Link to="/trucker/available-loads" className="au-btn au-btn--primary">
+            Find loads <span aria-hidden="true">&rarr;</span>
+          </Link>
+        </div>
+      )}
+
+      <div style={{ paddingBottom: 48 }}>
+        {completedLoads.map((match) => {
+          const ownReview =
+            Array.isArray(match.load.reviews) &&
+            match.load.reviews.find((review) => review.reviewerId === userId);
+
+          return (
+            <Record
+              key={match.id}
+              route={formatRoute(match.load.origin, match.load.destination)}
+              endpoints={formatEndpoints(match.load.origin, match.load.destination)}
+              status={match.load.status}
+              meta={[
+                { label: 'Shipper', value: match.shipper.name },
+                { label: 'Contact', value: match.shipper.email },
+                { label: 'Budget', value: formatMoney(match.load.budget) },
+              ]}
+            >
+              {ownReview && (
+                <div className="au-notice au-notice--quiet" style={{ marginTop: 20, marginBottom: 0 }}>
+                  <span className="au-eyebrow" style={{ marginBottom: 4 }}>
+                    Your review — {ownReview.rating}/5
+                  </span>
+                  {ownReview.comment || 'No comment left.'}
+                </div>
+              )}
+
+              <div className="au-actions">
+                {!ownReview && (
+                  <button
+                    type="button"
+                    className="au-btn au-btn--primary au-btn--sm"
+                    onClick={() => handleReview(match.load.id)}
+                  >
+                    Leave a review <span aria-hidden="true">&rarr;</span>
+                  </button>
                 )}
-                {hasReviewed && (
-                  <div className="mt-3">
-                    <h6>Your Review:</h6>
-                    <p>Rating: {match.load.reviews.find(review => review.reviewerId === userId).rating}/5</p>
-                    <p>{match.load.reviews.find(review => review.reviewerId === userId).comment}</p>
-                  </div>
-                )}
-              </li>
-            )
-          })
-        ) : (
-          <div>
-            <p>No completed loads yet.</p>
-            <Link to="/trucker/available-loads" className="btn btn-primary">Find Loads</Link>
-          </div>
-        )}
-      </ul>
+                <Link
+                  to={`/reviews/${match.shipper.id}`}
+                  className="au-btn au-btn--secondary au-btn--sm"
+                >
+                  All reviews for this shipper
+                </Link>
+              </div>
+            </Record>
+          );
+        })}
+      </div>
 
       {showReviewForm && (
-        <div className="mt-4">
-          <h3>Leave a Review for Load: {reviewLoadId}</h3>
-          <div className="mb-3">
-            <label className="form-label">Rating (1-5)</label>
+        <div className="au-card au-card--raised" style={{ marginBottom: 48, maxWidth: 540 }}>
+          <span className="au-eyebrow">Leave a review</span>
+
+          <div className="au-field">
+            <label className="au-label" htmlFor="review-rating">Rating (1–5)</label>
             <input
+              id="review-rating"
               type="number"
-              className="form-control"
+              className="au-input"
               min="1"
               max="5"
               value={reviewRating}
@@ -102,20 +153,34 @@ const CompletedLoads = () => {
               required
             />
           </div>
-          <div className="mb-3">
-            <label className="form-label">Comment (Optional)</label>
+
+          <div className="au-field">
+            <label className="au-label" htmlFor="review-comment">Comment</label>
             <textarea
-              className="form-control"
+              id="review-comment"
+              className="au-textarea"
               rows="3"
               value={reviewComment}
               onChange={(e) => setReviewComment(e.target.value)}
-            ></textarea>
+            />
+            <span className="au-help">Optional, but it is what the next trucker reads.</span>
           </div>
-          <button className="btn btn-success me-2" onClick={handleSubmitReview}>Submit Review</button>
-          <button className="btn btn-secondary" onClick={() => setShowReviewForm(false)}>Cancel</button>
+
+          <div className="au-actions" style={{ marginTop: 0 }}>
+            <button type="button" className="au-btn au-btn--primary" onClick={handleSubmitReview}>
+              Submit review <span aria-hidden="true">&rarr;</span>
+            </button>
+            <button
+              type="button"
+              className="au-btn au-btn--secondary"
+              onClick={() => setShowReviewForm(false)}
+            >
+              Cancel
+            </button>
+          </div>
         </div>
       )}
-    </div>
+    </AppShell>
   );
 };
 

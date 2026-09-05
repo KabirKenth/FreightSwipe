@@ -1,13 +1,17 @@
+/* Google's address-selection widget, brought onto the Aurora canvas.
+   Selectors stay scoped to .address-selection-container so the bare element
+   rules below cannot leak into the rest of the app. */
 
 .address-selection-container {
   position: fixed;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background-color: white;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  background-color: var(--surface-paper-white-canvas);
+  border: 1px solid var(--color-mist);
+  border-radius: var(--radius-cards);
+  box-shadow: none;
+  padding: var(--card-padding);
   z-index: 1001;
   /* Fixed 600x500 overflowed narrow screens; cap to the viewport instead. */
   width: min(600px, 92vw);
@@ -15,62 +19,78 @@
   overflow-y: auto;
 }
 
-.sb-title {
+.address-selection-container .sb-title {
   position: relative;
   top: -12px;
-  font-family: Roboto, sans-serif;
-  font-weight: 500;
+  font-family: var(--font-inter);
+  font-size: var(--text-caption);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--color-slate-whisper);
 }
 
-.sb-title-icon {
+.address-selection-container .sb-title-icon {
   position: relative;
   top: -5px;
 }
 
-gmpx-split-layout {
+.address-selection-container gmpx-split-layout {
   height: 100%;
   width: 100%;
 }
 
-gmpx-split-layout:not(:defined) {
+.address-selection-container gmpx-split-layout:not(:defined) {
   visibility: hidden;
 }
 
-.panel {
-  background: white;
+.address-selection-container .panel {
+  background: var(--surface-paper-white-canvas);
   box-sizing: border-box;
   height: 100%;
   width: 100%;
-  padding: 20px;
+  padding: var(--spacing-20);
   display: flex;
   flex-direction: column;
-  justify-content: space-around;
+  gap: var(--spacing-12);
 }
 
-.half-input-container {
+.address-selection-container .half-input-container {
   display: flex;
-  justify-content: space-between;
+  gap: var(--spacing-12);
 }
 
-.half-input {
-  max-width: 120px;
+.address-selection-container .half-input {
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: none;
 }
 
-h2 {
+.address-selection-container h2 {
   margin: 0;
-  font-family: Roboto, sans-serif;
+  font-family: var(--font-inter);
 }
 
-input {
-  height: 30px;
-  border: 0;
-  border-bottom: 1px solid black;
-  font-size: 14px;
-  font-family: Roboto, sans-serif;
+/* Aurora fields are Hailstone wells with a Mist hairline, not underlines. */
+.address-selection-container input {
+  height: auto;
+  padding: 12px var(--spacing-16);
+  background: var(--surface-hailstone-card);
+  border: 1px solid var(--color-mist);
+  border-radius: var(--radius-lg);
+  font-size: var(--text-body);
+  font-family: var(--font-inter);
   font-style: normal;
-  font-weight: normal;
+  font-weight: var(--font-weight-regular);
+  color: var(--color-horizon-navy);
 }
 
-input:focus::placeholder {
-  color: white;
+.address-selection-container input::placeholder {
+  color: var(--color-slate-whisper);
+}
+
+.address-selection-container input:focus {
+  background: var(--surface-paper-white-canvas);
+  border-color: var(--color-signal-blue);
+  outline: none;
 }

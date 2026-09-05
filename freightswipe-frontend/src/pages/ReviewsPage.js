@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { API_BASE } from '../api';
+import AppShell from '../components/AppShell';
+import { formatRoute } from '../components/Record';
 
 const ReviewsPage = () => {
   const { userId } = useParams();
@@ -31,25 +33,56 @@ const ReviewsPage = () => {
     fetchReviews();
   }, [userId]);
 
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error}</div>;
+  const standfirst = loading
+    ? 'Loading…'
+    : `Average rating ${averageRating ? averageRating.toFixed(1) : '—'} across ${reviews.length} ${
+        reviews.length === 1 ? 'review' : 'reviews'
+      }.`;
 
   return (
-    <div className="container mt-4">
-      <h2>Reviews</h2>
-      <h4>Average Rating: {averageRating ? averageRating.toFixed(1) : 'N/A'}</h4>
-      <div className="list-group">
-        {reviews.map(review => (
-          <div key={review.id} className="list-group-item">
-            <h5>Rating: {review.rating}/5</h5>
-            <p>{review.comment}</p>
-            <small>By: {review.reviewer.name} ({review.reviewer.role})</small>
-            <br />
-            <small>For Load: {review.load.origin.address}, {review.load.origin.city}, {review.load.origin.province} to {review.load.destination.address}, {review.load.destination.city}, {review.load.destination.province}</small>
-          </div>
+    <AppShell eyebrow="Reputation" title="Reviews." standfirst={standfirst}>
+      {error && <div className="au-notice">{error}</div>}
+
+      {!loading && !error && reviews.length === 0 && (
+        <div className="au-empty">
+          <h2 className="au-empty__title">No reviews yet.</h2>
+          <p className="au-empty__body">
+            Reviews appear here once a load this account was part of has been delivered and
+            the other side has left feedback.
+          </p>
+        </div>
+      )}
+
+      <div className="au-stack au-stack--sm" style={{ paddingBottom: 24 }}>
+        {reviews.map((review) => (
+          <article className="au-record" key={review.id}>
+            <div className="au-row" style={{ justifyContent: 'space-between', marginBottom: 8 }}>
+              <h2 className="au-record__route">{review.rating} / 5</h2>
+              <span className="au-status au-status--resting">
+                {review.reviewer.role}
+              </span>
+            </div>
+
+            <p className="au-body" style={{ marginBottom: 20 }}>
+              {review.comment || <span className="au-muted">No comment left.</span>}
+            </p>
+
+            <dl className="au-meta">
+              <div className="au-meta__item">
+                <dt className="au-meta__label">Reviewer</dt>
+                <dd className="au-meta__value">{review.reviewer.name}</dd>
+              </div>
+              <div className="au-meta__item">
+                <dt className="au-meta__label">Load</dt>
+                <dd className="au-meta__value">
+                  {formatRoute(review.load.origin, review.load.destination)}
+                </dd>
+              </div>
+            </dl>
+          </article>
         ))}
       </div>
-    </div>
+    </AppShell>
   );
 };
 
