@@ -232,6 +232,28 @@ app.post('/auth/demo', authLimiter, async (req, res) => {
 });
 
 /**
+ * @route GET /auth/me
+ * @description Returns the signed-in user, or 401 when there is no valid session.
+ *              The auth cookie is httpOnly, so the browser cannot read it and the
+ *              frontend has no other way to tell whether anyone is signed in --
+ *              which is why the landing page used to greet a signed-in user as a
+ *              stranger. Answers 401 rather than an error for the signed-out case:
+ *              that is a normal state, not a failure.
+ * @access Private
+ */
+app.get('/auth/me', authMiddleware, async (req, res) => {
+  const user = await prisma.user.findUnique({ where: { id: req.user.id } });
+  if (!user) {
+    // The token is valid but the account is gone (deleted, or the database was
+    // reseeded under a live session). Clear the cookie so the client stops
+    // presenting it.
+    res.clearCookie('token', { httpOnly: true, secure: isProd, sameSite: cookieOptions.sameSite, path: '/' });
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  res.json({ user: sanitizeUser(user) });
+});
+
+/**
  * @route POST /auth/logout
  * @description Clears the auth cookie.
  * @access Public
