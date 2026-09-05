@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useLoadScript } from '@react-google-maps/api';
-import { API_BASE } from '../api';
+import { API_BASE, errorMessage } from '../api';
 import PlaceAutocomplete from './PlaceAutocomplete';
 
 const libraries = ['places'];
@@ -149,7 +149,7 @@ const CreateLoadForm = ({ onNewLoad }) => {
       setTimeout(() => setSuccess(''), 3000);
     } catch (err) {
       console.error('Error creating load:', err);
-      setError(err.response?.data?.error || 'Failed to create load');
+      setError(errorMessage(err, 'Failed to create load'));
       setSuccess('');
     }
   };

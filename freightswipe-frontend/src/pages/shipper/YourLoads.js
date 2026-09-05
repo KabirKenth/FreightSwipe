@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { API_BASE } from '../../api';
+import { API_BASE, errorMessage } from '../../api';
 import AppShell from '../../components/AppShell';
 import Record, { formatRoute, formatEndpoints, formatWeight, formatMoney } from '../../components/Record';
 import ConfirmAction from '../../components/ConfirmAction';
@@ -47,7 +47,7 @@ const YourLoads = () => {
       fetchLoads();
     } catch (err) {
       console.error('Failed to cancel load:', err);
-      setError(err.response?.data?.error || 'Failed to cancel load');
+      setError(errorMessage(err, 'Failed to cancel load'));
     }
   };
 

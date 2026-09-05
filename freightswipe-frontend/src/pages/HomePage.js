@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { API_BASE } from '../api';
+import { API_BASE, errorMessage } from '../api';
 import { TopNav, SiteFooter } from '../components/AppShell';
 import Reveal from '../components/Reveal';
 
@@ -63,11 +63,7 @@ const HomePage = () => {
       await axios.post(`${API_BASE}/auth/demo`, { role }, { withCredentials: true });
       navigate(role === 'SHIPPER' ? '/shipper/dashboard' : '/trucker/dashboard');
     } catch (err) {
-      const message =
-        err.response && err.response.data && err.response.data.error
-          ? err.response.data.error
-          : 'Could not start the demo. Please try again.';
-      setError(message);
+      setError(errorMessage(err, 'Could not start the demo. Please try again.'));
       setLoadingRole(null);
     }
   };
